@@ -76,6 +76,74 @@ function BulletList({ items }) {
   );
 }
 
+function StoreCard({ store }) {
+  return (
+    <div
+      style={{
+        border: "1px solid #e5e7eb",
+        borderRadius: 14,
+        padding: 16,
+        background: "#ffffff"
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 12,
+          alignItems: "center",
+          flexWrap: "wrap"
+        }}
+      >
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 17, color: "#0f172a" }}>
+            {store.name}
+          </div>
+          <div style={{ marginTop: 6, color: "#64748b", fontSize: 14 }}>
+            {store.type} • {store.distance}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <a
+            href={store.productUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              background: "#0f172a",
+              color: "white",
+              textDecoration: "none",
+              borderRadius: 10,
+              padding: "10px 14px",
+              fontSize: 14,
+              fontWeight: 700
+            }}
+          >
+            View Parts
+          </a>
+
+          <a
+            href={store.mapUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              background: "#eef2ff",
+              color: "#1e3a8a",
+              textDecoration: "none",
+              borderRadius: 10,
+              padding: "10px 14px",
+              fontSize: 14,
+              fontWeight: 700
+            }}
+          >
+            Open Map
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [problem, setProblem] = useState("");
   const [loading, setLoading] = useState(false);
@@ -188,7 +256,7 @@ export default function App() {
                 }}
               >
                 AI repair copilot that helps you understand likely issues,
-                next steps, tools, and parts before you start turning wrenches.
+                next steps, tools, parts, and where to start looking nearby.
               </p>
             </div>
 
@@ -341,7 +409,7 @@ export default function App() {
                   "Highlights the likely issue",
                   "Lists likely causes to inspect first",
                   "Suggests tools and parts that may be needed",
-                  "Explains when to stop and get professional help"
+                  "Shows nearby parts store starting points"
                 ]}
               />
             </SectionCard>
@@ -453,6 +521,14 @@ export default function App() {
                 </p>
               </SectionCard>
             </div>
+
+            <SectionCard title="Nearby stores and parts links">
+              <div style={{ display: "grid", gap: 14 }}>
+                {result.stores?.map((store, index) => (
+                  <StoreCard key={index} store={store} />
+                ))}
+              </div>
+            </SectionCard>
           </div>
         ) : null}
       </div>
