@@ -2,6 +2,80 @@ import React, { useState } from "react";
 
 const API_BASE_URL = "https://fixpilot-beta.onrender.com";
 
+function SectionCard({ title, children }) {
+  return (
+    <div
+      style={{
+        background: "white",
+        border: "1px solid #e5e7eb",
+        borderRadius: 18,
+        padding: 20,
+        boxShadow: "0 4px 14px rgba(15, 23, 42, 0.06)"
+      }}
+    >
+      <h3
+        style={{
+          margin: "0 0 14px 0",
+          fontSize: 20,
+          color: "#0f172a"
+        }}
+      >
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+function Badge({ children, tone = "default" }) {
+  const styles = {
+    default: {
+      background: "#e2e8f0",
+      color: "#0f172a"
+    },
+    danger: {
+      background: "#fee2e2",
+      color: "#991b1b"
+    },
+    info: {
+      background: "#dbeafe",
+      color: "#1d4ed8"
+    },
+    success: {
+      background: "#dcfce7",
+      color: "#166534"
+    }
+  };
+
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "6px 10px",
+        borderRadius: 999,
+        fontSize: 13,
+        fontWeight: 700,
+        ...styles[tone]
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function BulletList({ items }) {
+  return (
+    <ul style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8, color: "#334155" }}>
+      {items?.map((item, index) => (
+        <li key={index} style={{ marginBottom: 8 }}>
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function App() {
   const [problem, setProblem] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,136 +118,344 @@ export default function App() {
   }
 
   return (
-    <div style={{ fontFamily: "Arial", padding: 40, maxWidth: 1000 }}>
-      <h1>FixPilot</h1>
-      <p>AI repair copilot beta.</p>
-
-      <div style={{ marginTop: 24 }}>
-        <label style={{ display: "block", fontWeight: 700, marginBottom: 10 }}>
-          Describe your repair problem
-        </label>
-
-        <textarea
-          value={problem}
-          onChange={(e) => setProblem(e.target.value)}
-          placeholder="Example: My truck won't start and I hear one click."
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)",
+        fontFamily: "Arial, sans-serif",
+        color: "#0f172a"
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1120,
+          margin: "0 auto",
+          padding: "32px 20px 60px"
+        }}
+      >
+        <div
           style={{
-            width: "100%",
-            minHeight: 140,
-            padding: 14,
-            borderRadius: 12,
-            border: "1px solid #cbd5e1",
-            fontSize: 16
-          }}
-        />
-      </div>
-
-      <div style={{ marginTop: 16 }}>
-        <button
-          onClick={submitProblem}
-          disabled={loading}
-          style={{
-            background: "#0f172a",
+            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
             color: "white",
-            border: "none",
-            borderRadius: 10,
-            padding: "12px 18px",
-            cursor: "pointer",
-            fontWeight: 700
+            borderRadius: 24,
+            padding: "32px 28px",
+            boxShadow: "0 10px 30px rgba(15, 23, 42, 0.18)"
           }}
         >
-          {loading ? "Analyzing..." : "Get FixPilot Guidance"}
-        </button>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "start",
+              gap: 20,
+              flexWrap: "wrap"
+            }}
+          >
+            <div style={{ maxWidth: 700 }}>
+              <div
+                style={{
+                  display: "inline-block",
+                  padding: "6px 12px",
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.12)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  textTransform: "uppercase",
+                  marginBottom: 14
+                }}
+              >
+                FixPilot Beta
+              </div>
+
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: 44,
+                  lineHeight: 1.05
+                }}
+              >
+                FixPilot
+              </h1>
+
+              <p
+                style={{
+                  marginTop: 14,
+                  marginBottom: 0,
+                  fontSize: 18,
+                  lineHeight: 1.6,
+                  color: "#cbd5e1"
+                }}
+              >
+                AI repair copilot that helps you understand likely issues,
+                next steps, tools, and parts before you start turning wrenches.
+              </p>
+            </div>
+
+            <div
+              style={{
+                minWidth: 220,
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 18,
+                padding: 16
+              }}
+            >
+              <div style={{ fontSize: 14, color: "#cbd5e1", marginBottom: 8 }}>
+                Product status
+              </div>
+              <Badge tone="success">Live Beta</Badge>
+              <p
+                style={{
+                  marginTop: 12,
+                  marginBottom: 0,
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: "#e2e8f0"
+                }}
+              >
+                Describe the problem, get structured guidance, and review what
+                may be needed before repair.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.15fr 0.85fr",
+            gap: 24,
+            marginTop: 24
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              border: "1px solid #e5e7eb",
+              borderRadius: 22,
+              padding: 24,
+              boxShadow: "0 6px 20px rgba(15, 23, 42, 0.05)"
+            }}
+          >
+            <h2
+              style={{
+                margin: "0 0 10px 0",
+                fontSize: 26
+              }}
+            >
+              Describe your repair problem
+            </h2>
+
+            <p
+              style={{
+                margin: "0 0 18px 0",
+                color: "#475569",
+                lineHeight: 1.6
+              }}
+            >
+              Include the symptoms, sounds, warning messages, and when the issue
+              happens. The more specific you are, the better the guidance.
+            </p>
+
+            <textarea
+              value={problem}
+              onChange={(e) => setProblem(e.target.value)}
+              placeholder="Example: My battery won't keep its charge and the truck struggles to start in the morning."
+              style={{
+                width: "100%",
+                minHeight: 180,
+                padding: 16,
+                borderRadius: 16,
+                border: "1px solid #cbd5e1",
+                background: "#f8fafc",
+                fontSize: 16,
+                lineHeight: 1.6,
+                resize: "vertical",
+                outline: "none",
+                boxSizing: "border-box"
+              }}
+            />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                flexWrap: "wrap",
+                marginTop: 18
+              }}
+            >
+              <div style={{ color: "#64748b", fontSize: 14 }}>
+                Example topics: no-start, overheating, brake noise, battery drain,
+                air suspension warnings.
+              </div>
+
+              <button
+                onClick={submitProblem}
+                disabled={loading}
+                style={{
+                  background: loading ? "#475569" : "#0f172a",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 12,
+                  padding: "14px 18px",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  fontSize: 15,
+                  minWidth: 210,
+                  boxShadow: "0 8px 18px rgba(15, 23, 42, 0.16)"
+                }}
+              >
+                {loading ? "Analyzing..." : "Get FixPilot Guidance"}
+              </button>
+            </div>
+
+            {error ? (
+              <div
+                style={{
+                  marginTop: 20,
+                  padding: 16,
+                  borderRadius: 14,
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  color: "#991b1b",
+                  fontWeight: 600
+                }}
+              >
+                {error}
+              </div>
+            ) : null}
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 18
+            }}
+          >
+            <SectionCard title="How FixPilot helps">
+              <BulletList
+                items={[
+                  "Highlights the likely issue",
+                  "Lists likely causes to inspect first",
+                  "Suggests tools and parts that may be needed",
+                  "Explains when to stop and get professional help"
+                ]}
+              />
+            </SectionCard>
+
+            <SectionCard title="Best results come from">
+              <BulletList
+                items={[
+                  "Including exact warning messages",
+                  "Describing sounds, smells, or vibrations",
+                  "Explaining when the issue happens",
+                  "Mentioning recent repairs or battery changes"
+                ]}
+              />
+            </SectionCard>
+          </div>
+        </div>
+
+        {result ? (
+          <div
+            style={{
+              marginTop: 26,
+              display: "grid",
+              gap: 20
+            }}
+          >
+            <div
+              style={{
+                background: "white",
+                border: "1px solid #dbeafe",
+                borderRadius: 22,
+                padding: 24,
+                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.05)"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 16,
+                  flexWrap: "wrap",
+                  alignItems: "center"
+                }}
+              >
+                <div>
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: 30
+                    }}
+                  >
+                    {result.title}
+                  </h2>
+                  <p
+                    style={{
+                      margin: "10px 0 0 0",
+                      color: "#334155",
+                      fontSize: 17,
+                      lineHeight: 1.6
+                    }}
+                  >
+                    <strong>Likely issue:</strong> {result.likelyIssue}
+                  </p>
+                </div>
+
+                <Badge tone="info">Difficulty: {result.difficulty}</Badge>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 20
+              }}
+            >
+              <SectionCard title="Likely causes">
+                <BulletList items={result.likelyCauses} />
+              </SectionCard>
+
+              <SectionCard title="Recommended steps">
+                <BulletList items={result.steps} />
+              </SectionCard>
+
+              <SectionCard title="Parts that may be needed">
+                <BulletList items={result.partsNeeded} />
+              </SectionCard>
+
+              <SectionCard title="Tools">
+                <BulletList items={result.tools} />
+              </SectionCard>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 20
+              }}
+            >
+              <SectionCard title="When to get professional help">
+                <p style={{ margin: 0, color: "#334155", lineHeight: 1.8 }}>
+                  {result.getHelpIf}
+                </p>
+              </SectionCard>
+
+              <SectionCard title="Safety">
+                <p style={{ margin: 0, color: "#334155", lineHeight: 1.8 }}>
+                  {result.safety}
+                </p>
+              </SectionCard>
+            </div>
+          </div>
+        ) : null}
       </div>
-
-      {error ? (
-        <div
-          style={{
-            marginTop: 20,
-            padding: 16,
-            borderRadius: 12,
-            background: "#fef2f2",
-            border: "1px solid #fecaca",
-            color: "#991b1b"
-          }}
-        >
-          {error}
-        </div>
-      ) : null}
-
-      {result ? (
-        <div
-          style={{
-            marginTop: 24,
-            padding: 20,
-            borderRadius: 14,
-            border: "1px solid #d1d5db",
-            background: "#f8fafc"
-          }}
-        >
-          <h2 style={{ marginTop: 0 }}>{result.title}</h2>
-
-          <p>
-            <strong>Likely issue:</strong> {result.likelyIssue}
-          </p>
-
-          <p>
-            <strong>Difficulty:</strong> {result.difficulty}
-          </p>
-
-          <div style={{ marginTop: 16 }}>
-            <strong>Likely causes:</strong>
-            <ul>
-              {result.likelyCauses?.map((cause, index) => (
-                <li key={index} style={{ marginTop: 8 }}>
-                  {cause}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <strong>Recommended steps:</strong>
-            <ul>
-              {result.steps?.map((step, index) => (
-                <li key={index} style={{ marginTop: 8 }}>
-                  {step}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <strong>Parts that may be needed:</strong>
-            <ul>
-              {result.partsNeeded?.map((part, index) => (
-                <li key={index} style={{ marginTop: 8 }}>
-                  {part}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <strong>Tools:</strong>
-            <ul>
-              {result.tools?.map((tool, index) => (
-                <li key={index} style={{ marginTop: 8 }}>
-                  {tool}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <p style={{ marginTop: 16 }}>
-            <strong>Get professional help if:</strong> {result.getHelpIf}
-          </p>
-
-          <p style={{ marginTop: 16 }}>
-            <strong>Safety:</strong> {result.safety}
-          </p>
-        </div>
-      ) : null}
     </div>
   );
 }
