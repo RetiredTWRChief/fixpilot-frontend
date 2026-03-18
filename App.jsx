@@ -44,7 +44,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ fontFamily: "Arial", padding: 40, maxWidth: 900 }}>
+    <div style={{ fontFamily: "Arial", padding: 40, maxWidth: 1000 }}>
       <h1>FixPilot</h1>
       <p>AI repair copilot beta.</p>
 
@@ -117,12 +117,38 @@ export default function App() {
             <strong>Likely issue:</strong> {result.likelyIssue}
           </p>
 
+          <p>
+            <strong>Difficulty:</strong> {result.difficulty}
+          </p>
+
+          <div style={{ marginTop: 16 }}>
+            <strong>Likely causes:</strong>
+            <ul>
+              {result.likelyCauses?.map((cause, index) => (
+                <li key={index} style={{ marginTop: 8 }}>
+                  {cause}
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <div style={{ marginTop: 16 }}>
             <strong>Recommended steps:</strong>
             <ul>
               {result.steps?.map((step, index) => (
                 <li key={index} style={{ marginTop: 8 }}>
                   {step}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <strong>Parts that may be needed:</strong>
+            <ul>
+              {result.partsNeeded?.map((part, index) => (
+                <li key={index} style={{ marginTop: 8 }}>
+                  {part}
                 </li>
               ))}
             </ul>
@@ -138,6 +164,10 @@ export default function App() {
               ))}
             </ul>
           </div>
+
+          <p style={{ marginTop: 16 }}>
+            <strong>Get professional help if:</strong> {result.getHelpIf}
+          </p>
 
           <p style={{ marginTop: 16 }}>
             <strong>Safety:</strong> {result.safety}
