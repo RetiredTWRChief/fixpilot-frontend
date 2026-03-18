@@ -144,6 +144,47 @@ function StoreCard({ store }) {
   );
 }
 
+function VideoCard({ video }) {
+  return (
+    <div
+      style={{
+        border: "1px solid #e5e7eb",
+        borderRadius: 14,
+        padding: 16,
+        background: "#ffffff"
+      }}
+    >
+      <div style={{ fontWeight: 700, fontSize: 17, color: "#0f172a" }}>
+        {video.title}
+      </div>
+
+      <div style={{ marginTop: 6, color: "#64748b", fontSize: 14 }}>
+        {video.source}
+      </div>
+
+      <div style={{ marginTop: 14 }}>
+        <a
+          href={video.url}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            background: "#0f172a",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 10,
+            padding: "10px 14px",
+            fontSize: 14,
+            fontWeight: 700,
+            display: "inline-block"
+          }}
+        >
+          Watch / Search Video
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [problem, setProblem] = useState("");
   const [loading, setLoading] = useState(false);
@@ -256,7 +297,7 @@ export default function App() {
                 }}
               >
                 AI repair copilot that helps you understand likely issues,
-                next steps, tools, parts, and where to start looking nearby.
+                next steps, tools, parts, nearby stores, and useful repair videos.
               </p>
             </div>
 
@@ -409,7 +450,8 @@ export default function App() {
                   "Highlights the likely issue",
                   "Lists likely causes to inspect first",
                   "Suggests tools and parts that may be needed",
-                  "Shows nearby parts store starting points"
+                  "Shows nearby parts store starting points",
+                  "Recommends videos to keep learning"
                 ]}
               />
             </SectionCard>
@@ -526,6 +568,14 @@ export default function App() {
               <div style={{ display: "grid", gap: 14 }}>
                 {result.stores?.map((store, index) => (
                   <StoreCard key={index} store={store} />
+                ))}
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Recommended videos">
+              <div style={{ display: "grid", gap: 14 }}>
+                {result.videos?.map((video, index) => (
+                  <VideoCard key={index} video={video} />
                 ))}
               </div>
             </SectionCard>
