@@ -12,6 +12,8 @@ export default function App() {
     symptoms: "",
   });
 
+  const [extraDetails, setExtraDetails] = useState("");
+  const [selectedQuestion, setSelectedQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -23,11 +25,9 @@ export default function App() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const runDiagnosis = async (payload) => {
     setLoading(true);
     setError("");
-    setResult(null);
 
     try {
       const response = await fetch(`${API_URL}/diagnose`, {
@@ -35,7 +35,7 @@ export default function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -52,6 +52,40 @@ export default function App() {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setResult(null);
+    setExtraDetails("");
+    setSelectedQuestion("");
+    await runDiagnosis(formData);
+  };
+
+  const handleAddDetailsSubmit = async (e) => {
+    e.preventDefault();
+
+    const combinedSymptoms = [
+      formData.symptoms?.trim(),
+      selectedQuestion ? `${selectedQuestion} ${extraDetails}`.trim() : extraDetails.trim(),
+    ]
+      .filter(Boolean)
+      .join("\n\nAdditional details:\n");
+
+    const updatedPayload = {
+      ...formData,
+      symptoms: combinedSymptoms,
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      symptoms: combinedSymptoms,
+    }));
+
+    await runDiagnosis(updatedPayload);
+
+    setExtraDetails("");
+    setSelectedQuestion("");
+  };
+
   const difficultyClass = (difficulty) => {
     const text = (difficulty || "").toLowerCase();
 
@@ -59,6 +93,10 @@ export default function App() {
     if (text.includes("intermediate")) return "badge intermediate";
     return "badge advanced";
   };
+
+  const needsMoreInfo =
+    result?.title?.toLowerCase().includes("more information needed") ||
+    result?.confidence?.toLowerCase().includes("low");
 
   return (
     <div className="app-shell">
@@ -217,6 +255,19 @@ export default function App() {
           opacity: 0.7;
           cursor: not-allowed;
           transform: none;
+        }
+
+        .secondary-btn {
+          width: 100%;
+          border: 1px solid #bfdbfe;
+          background: #eff6ff;
+          color: #1d4ed8;
+          border-radius: 16px;
+          padding: 14px 18px;
+          font-size: 1rem;
+          font-weight: 700;
+          cursor: pointer;
+          margin-top: 10px;
         }
 
         .error-box {
@@ -433,6 +484,8 @@ export default function App() {
           color: #1d4ed8;
           font-size: 0.88rem;
           font-weight: 700;
+          border: none;
+          cursor: pointer;
         }
 
         .question-box {
@@ -440,6 +493,27 @@ export default function App() {
           border: 1px solid #cbd5e1;
           border-radius: 18px;
           padding: 18px;
+        }
+
+        .conversation-box {
+          background: #f8fbff;
+          border: 1px solid #bfdbfe;
+          border-radius: 20px;
+          padding: 20px;
+        }
+
+        .conversation-box textarea {
+          min-height: 120px;
+        }
+
+        .selected-question {
+          margin-bottom: 10px;
+          padding: 10px 12px;
+          background: #eff6ff;
+          border: 1px solid #bfdbfe;
+          border-radius: 12px;
+          color: #1e3a8a;
+          font-weight: 600;
         }
 
         .notes li {
@@ -629,9 +703,64 @@ export default function App() {
                     <h3>Questions I’d Ask Next Like A Mechanic Would</h3>
                     <ul className="list">
                       {result.followUpQuestions.map((question, index) => (
-                        <li key={index}>{question}</li>
+                        <li key={index}>
+                          <button
+                            type="button"
+                            className="chip-link"
+                            onClick={() => {
+                              setSelectedQuestion(question);
+                              setExtraDetails("");
+                            }}
+                          >
+                            Use this question
+                          </button>
+                          <div style={{ marginTop: "8px" }}>{question}</div>
+                        </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {needsMoreInfo && (
+                  <div className="conversation-box">
+                    <h3>Add More Details</h3>
+                    <p className="subtext">
+                      Keep the original symptom, then add what happened next. This lets the diagnosis get more specific instead of starting over.
+                    </p>
+
+                    {selectedQuestion && (
+                      <div className="selected-question">
+                        Selected question: {selectedQuestion}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleAddDetailsSubmit}>
+                      <div className="field">
+                        <label htmlFor="extraDetails">Add what you know now</label>
+                        <textarea
+                          id="extraDetails"
+                          value={extraDetails}
+                          onChange={(e) => setExtraDetails(e.target.value)}
+                          placeholder="Example: It only hesitates when I first press the gas pedal, especially in the morning. No check engine light. After a few minutes it runs normal."
+                          required
+                        />
+                      </div>
+
+                      <button className="submit-btn" type="submit" disabled={loading}>
+                        {loading ? "Updating Diagnosis..." : "Update Diagnosis With More Detail"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        onClick={() => {
+                          setExtraDetails("");
+                          setSelectedQuestion("");
+                        }}
+                      >
+                        Clear Added Detail
+                      </button>
+                    </form>
                   </div>
                 )}
 
