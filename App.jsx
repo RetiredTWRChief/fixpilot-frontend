@@ -65,7 +65,9 @@ export default function App() {
 
     const combinedSymptoms = [
       formData.symptoms?.trim(),
-      selectedQuestion ? `${selectedQuestion} ${extraDetails}`.trim() : extraDetails.trim(),
+      selectedQuestion
+        ? `${selectedQuestion} ${extraDetails}`.trim()
+        : extraDetails.trim(),
     ]
       .filter(Boolean)
       .join("\n\nAdditional details:\n");
@@ -497,9 +499,16 @@ export default function App() {
 
         .conversation-box {
           background: #f8fbff;
-          border: 1px solid #bfdbfe;
+          border: 1px solid #93c5fd;
           border-radius: 20px;
           padding: 20px;
+          box-shadow: 0 10px 25px rgba(37, 99, 235, 0.08);
+        }
+
+        .conversation-box h3 {
+          margin-top: 0;
+          margin-bottom: 10px;
+          color: #1e3a8a;
         }
 
         .conversation-box textarea {
@@ -550,30 +559,65 @@ export default function App() {
               <div className="grid-2">
                 <div className="field">
                   <label htmlFor="year">Year</label>
-                  <input id="year" name="year" type="text" value={formData.year} onChange={handleChange} placeholder="2019" />
+                  <input
+                    id="year"
+                    name="year"
+                    type="text"
+                    value={formData.year}
+                    onChange={handleChange}
+                    placeholder="2019"
+                  />
                 </div>
 
                 <div className="field">
                   <label htmlFor="make">Make</label>
-                  <input id="make" name="make" type="text" value={formData.make} onChange={handleChange} placeholder="Ram" />
+                  <input
+                    id="make"
+                    name="make"
+                    type="text"
+                    value={formData.make}
+                    onChange={handleChange}
+                    placeholder="Ram"
+                  />
                 </div>
               </div>
 
               <div className="grid-2">
                 <div className="field">
                   <label htmlFor="model">Model</label>
-                  <input id="model" name="model" type="text" value={formData.model} onChange={handleChange} placeholder="1500 Limited" />
+                  <input
+                    id="model"
+                    name="model"
+                    type="text"
+                    value={formData.model}
+                    onChange={handleChange}
+                    placeholder="1500 Limited"
+                  />
                 </div>
 
                 <div className="field">
                   <label htmlFor="engine">Engine</label>
-                  <input id="engine" name="engine" type="text" value={formData.engine} onChange={handleChange} placeholder="5.7L V8" />
+                  <input
+                    id="engine"
+                    name="engine"
+                    type="text"
+                    value={formData.engine}
+                    onChange={handleChange}
+                    placeholder="5.7L V8"
+                  />
                 </div>
               </div>
 
               <div className="field">
                 <label htmlFor="vin">VIN</label>
-                <input id="vin" name="vin" type="text" value={formData.vin} onChange={handleChange} placeholder="Enter VIN if available" />
+                <input
+                  id="vin"
+                  name="vin"
+                  type="text"
+                  value={formData.vin}
+                  onChange={handleChange}
+                  placeholder="Enter VIN if available"
+                />
               </div>
 
               <div className="field">
@@ -601,7 +645,8 @@ export default function App() {
               <div className="placeholder">
                 <h2>No diagnosis yet</h2>
                 <p>
-                  Enter the vehicle details and symptoms, then click <strong>Get Diagnosis</strong> to see a mechanic-style breakdown.
+                  Enter the vehicle details and symptoms, then click{" "}
+                  <strong>Get Diagnosis</strong> to start the conversation.
                 </p>
               </div>
             ) : (
@@ -624,161 +669,209 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="section-grid">
-                  <div className="info-card">
-                    <h3>Why This Might Be Happening</h3>
-                    <p>{result.why}</p>
-                  </div>
-
-                  <div className="info-card">
-                    <h3>What To Check First</h3>
-                    <p>{result.firstCheck}</p>
-                  </div>
-
-                  <div className="info-card warning-card">
-                    <h3>Safety Warning</h3>
-                    <p>{result.safety}</p>
-                  </div>
-
-                  <div className="info-card stop-card">
-                    <h3>When To Stop And Call A Mechanic</h3>
-                    <p>{result.whenToStop}</p>
-                  </div>
-                </div>
-
-                <div className="info-card">
-                  <h3>Tools You May Need</h3>
-                  <div className="tool-list">
-                    {result.tools?.map((tool, index) => (
-                      <div className="tool-item" key={index}>
-                        <strong>{tool.name}</strong>
-                        <span>{tool.description}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="info-card">
-                  <h3>Step-By-Step Beginner-Friendly Checks</h3>
-                  <ol className="list">
-                    {result.steps?.map((step, index) => (
-                      <li key={index}>{step}</li>
-                    ))}
-                  </ol>
-                </div>
-
-                <div className="info-card">
-                  <h3>Parts Lookup Links</h3>
-                  <div className="resource-grid">
-                    {result.partLinks?.map((part, index) => (
-                      <div className="resource-item" key={index}>
-                        <strong>{part.name}</strong>
-                        <div className="link-row">
-                          <a className="chip-link" href={part.google} target="_blank" rel="noreferrer">Google</a>
-                          <a className="chip-link" href={part.amazon} target="_blank" rel="noreferrer">Amazon</a>
-                          <a className="chip-link" href={part.autozone} target="_blank" rel="noreferrer">AutoZone</a>
-                          <a className="chip-link" href={part.rockauto} target="_blank" rel="noreferrer">RockAuto</a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="info-card">
-                  <h3>Helpful Videos</h3>
-                  <div className="resource-grid">
-                    {result.videoLinks?.map((video, index) => (
-                      <div className="resource-item" key={index}>
-                        <strong>{video.title}</strong>
-                        <div className="link-row">
-                          <a className="chip-link" href={video.youtube} target="_blank" rel="noreferrer">Watch on YouTube</a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {result.followUpQuestions?.length > 0 && (
-                  <div className="info-card question-box">
-                    <h3>Questions I’d Ask Next Like A Mechanic Would</h3>
-                    <ul className="list">
-                      {result.followUpQuestions.map((question, index) => (
-                        <li key={index}>
-                          <button
-                            type="button"
-                            className="chip-link"
-                            onClick={() => {
-                              setSelectedQuestion(question);
-                              setExtraDetails("");
-                            }}
-                          >
-                            Use this question
-                          </button>
-                          <div style={{ marginTop: "8px" }}>{question}</div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {needsMoreInfo && (
-                  <div className="conversation-box">
-                    <h3>Add More Details</h3>
-                    <p className="subtext">
-                      Keep the original symptom, then add what happened next. This lets the diagnosis get more specific instead of starting over.
-                    </p>
-
-                    {selectedQuestion && (
-                      <div className="selected-question">
-                        Selected question: {selectedQuestion}
+                {needsMoreInfo ? (
+                  <>
+                    {result.followUpQuestions?.length > 0 && (
+                      <div className="info-card question-box">
+                        <h3>Questions I’d Ask Next Like A Mechanic Would</h3>
+                        <ul className="list">
+                          {result.followUpQuestions.map((question, index) => (
+                            <li key={index}>
+                              <button
+                                type="button"
+                                className="chip-link"
+                                onClick={() => {
+                                  setSelectedQuestion(question);
+                                  setExtraDetails("");
+                                }}
+                              >
+                                Use this question
+                              </button>
+                              <div style={{ marginTop: "8px" }}>{question}</div>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
 
-                    <form onSubmit={handleAddDetailsSubmit}>
-                      <div className="field">
-                        <label htmlFor="extraDetails">Add what you know now</label>
-                        <textarea
-                          id="extraDetails"
-                          value={extraDetails}
-                          onChange={(e) => setExtraDetails(e.target.value)}
-                          placeholder="Example: It only hesitates when I first press the gas pedal, especially in the morning. No check engine light. After a few minutes it runs normal."
-                          required
-                        />
+                    <div className="conversation-box">
+                      <h3>Tell Me A Little More So I Can Narrow It Down</h3>
+                      <p className="subtext">
+                        I do not have enough detail yet to give you a real diagnosis.
+                        Add more information below and I’ll take another look.
+                      </p>
+
+                      {selectedQuestion && (
+                        <div className="selected-question">
+                          Selected question: {selectedQuestion}
+                        </div>
+                      )}
+
+                      <form onSubmit={handleAddDetailsSubmit}>
+                        <div className="field">
+                          <label htmlFor="extraDetails">
+                            Add more information here
+                          </label>
+                          <textarea
+                            id="extraDetails"
+                            value={extraDetails}
+                            onChange={(e) => setExtraDetails(e.target.value)}
+                            placeholder="Example: It only happens when I first press the gas pedal, especially in the morning. No check engine light. After a few minutes it runs normal."
+                            required
+                          />
+                        </div>
+
+                        <button
+                          className="submit-btn"
+                          type="submit"
+                          disabled={loading}
+                        >
+                          {loading
+                            ? "Updating Diagnosis..."
+                            : "Update Diagnosis With More Detail"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="secondary-btn"
+                          onClick={() => {
+                            setExtraDetails("");
+                            setSelectedQuestion("");
+                          }}
+                        >
+                          Clear Added Detail
+                        </button>
+                      </form>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="section-grid">
+                      <div className="info-card">
+                        <h3>Why This Might Be Happening</h3>
+                        <p>{result.why}</p>
                       </div>
 
-                      <button className="submit-btn" type="submit" disabled={loading}>
-                        {loading ? "Updating Diagnosis..." : "Update Diagnosis With More Detail"}
-                      </button>
+                      <div className="info-card">
+                        <h3>What To Check First</h3>
+                        <p>{result.firstCheck}</p>
+                      </div>
 
-                      <button
-                        type="button"
-                        className="secondary-btn"
-                        onClick={() => {
-                          setExtraDetails("");
-                          setSelectedQuestion("");
-                        }}
-                      >
-                        Clear Added Detail
-                      </button>
-                    </form>
-                  </div>
-                )}
+                      <div className="info-card warning-card">
+                        <h3>Safety Warning</h3>
+                        <p>{result.safety}</p>
+                      </div>
 
-                {result.extraNotes?.length > 0 && (
-                  <div className="info-card">
-                    <h3>Extra Notes</h3>
-                    <ul className="list notes">
-                      {result.extraNotes.map((note, index) => (
-                        <li key={index}>{note}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                      <div className="info-card stop-card">
+                        <h3>When To Stop And Call A Mechanic</h3>
+                        <p>{result.whenToStop}</p>
+                      </div>
+                    </div>
 
-                {result.mechanicClosing && (
-                  <div className="mechanic-closing">
-                    {result.mechanicClosing}
-                  </div>
+                    <div className="info-card">
+                      <h3>Tools You May Need</h3>
+                      <div className="tool-list">
+                        {result.tools?.map((tool, index) => (
+                          <div className="tool-item" key={index}>
+                            <strong>{tool.name}</strong>
+                            <span>{tool.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="info-card">
+                      <h3>Step-By-Step Beginner-Friendly Checks</h3>
+                      <ol className="list">
+                        {result.steps?.map((step, index) => (
+                          <li key={index}>{step}</li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    <div className="info-card">
+                      <h3>Parts Lookup Links</h3>
+                      <div className="resource-grid">
+                        {result.partLinks?.map((part, index) => (
+                          <div className="resource-item" key={index}>
+                            <strong>{part.name}</strong>
+                            <div className="link-row">
+                              <a
+                                className="chip-link"
+                                href={part.google}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Google
+                              </a>
+                              <a
+                                className="chip-link"
+                                href={part.amazon}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Amazon
+                              </a>
+                              <a
+                                className="chip-link"
+                                href={part.autozone}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                AutoZone
+                              </a>
+                              <a
+                                className="chip-link"
+                                href={part.rockauto}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                RockAuto
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="info-card">
+                      <h3>Helpful Videos</h3>
+                      <div className="resource-grid">
+                        {result.videoLinks?.map((video, index) => (
+                          <div className="resource-item" key={index}>
+                            <strong>{video.title}</strong>
+                            <div className="link-row">
+                              <a
+                                className="chip-link"
+                                href={video.youtube}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Watch on YouTube
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {result.extraNotes?.length > 0 && (
+                      <div className="info-card">
+                        <h3>Extra Notes</h3>
+                        <ul className="list notes">
+                          {result.extraNotes.map((note, index) => (
+                            <li key={index}>{note}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {result.mechanicClosing && (
+                      <div className="mechanic-closing">
+                        {result.mechanicClosing}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
