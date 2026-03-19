@@ -13,13 +13,7 @@ function SectionCard({ title, children }) {
         boxShadow: "0 4px 14px rgba(15, 23, 42, 0.06)"
       }}
     >
-      <h3
-        style={{
-          margin: "0 0 14px 0",
-          fontSize: 20,
-          color: "#0f172a"
-        }}
-      >
+      <h3 style={{ margin: "0 0 14px 0", fontSize: 20, color: "#0f172a" }}>
         {title}
       </h3>
       {children}
@@ -29,22 +23,10 @@ function SectionCard({ title, children }) {
 
 function Badge({ children, tone = "default" }) {
   const styles = {
-    default: {
-      background: "#e2e8f0",
-      color: "#0f172a"
-    },
-    danger: {
-      background: "#fee2e2",
-      color: "#991b1b"
-    },
-    info: {
-      background: "#dbeafe",
-      color: "#1d4ed8"
-    },
-    success: {
-      background: "#dcfce7",
-      color: "#166534"
-    }
+    default: { background: "#e2e8f0", color: "#0f172a" },
+    danger: { background: "#fee2e2", color: "#991b1b" },
+    info: { background: "#dbeafe", color: "#1d4ed8" },
+    success: { background: "#dcfce7", color: "#166534" }
   };
 
   return (
@@ -157,11 +139,9 @@ function VideoCard({ video }) {
       <div style={{ fontWeight: 700, fontSize: 17, color: "#0f172a" }}>
         {video.title}
       </div>
-
       <div style={{ marginTop: 6, color: "#64748b", fontSize: 14 }}>
         {video.source}
       </div>
-
       <div style={{ marginTop: 14 }}>
         <a
           href={video.url}
@@ -187,6 +167,10 @@ function VideoCard({ video }) {
 
 export default function App() {
   const [problem, setProblem] = useState("");
+  const [year, setYear] = useState("");
+  const [make, setMake] = useState("");
+  const [model, setModel] = useState("");
+  const [vin, setVin] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -208,7 +192,13 @@ export default function App() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ problem })
+        body: JSON.stringify({
+          problem,
+          year,
+          make,
+          model,
+          vin
+        })
       });
 
       const data = await res.json();
@@ -219,6 +209,12 @@ export default function App() {
       }
 
       setResult(data);
+
+      if (data.decodedVIN) {
+        if (!year) setYear(data.decodedVIN.year || "");
+        if (!make) setMake(data.decodedVIN.make || "");
+        if (!model) setModel(data.decodedVIN.model || "");
+      }
     } catch (err) {
       setError("Could not connect to FixPilot backend.");
     } finally {
@@ -235,13 +231,7 @@ export default function App() {
         color: "#0f172a"
       }}
     >
-      <div
-        style={{
-          maxWidth: 1120,
-          margin: "0 auto",
-          padding: "32px 20px 60px"
-        }}
-      >
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "32px 20px 60px" }}>
         <div
           style={{
             background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
@@ -251,15 +241,7 @@ export default function App() {
             boxShadow: "0 10px 30px rgba(15, 23, 42, 0.18)"
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "start",
-              gap: 20,
-              flexWrap: "wrap"
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: 20, flexWrap: "wrap" }}>
             <div style={{ maxWidth: 700 }}>
               <div
                 style={{
@@ -277,15 +259,7 @@ export default function App() {
                 FixPilot Beta
               </div>
 
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: 44,
-                  lineHeight: 1.05
-                }}
-              >
-                FixPilot
-              </h1>
+              <h1 style={{ margin: 0, fontSize: 44, lineHeight: 1.05 }}>FixPilot</h1>
 
               <p
                 style={{
@@ -323,21 +297,13 @@ export default function App() {
                   color: "#e2e8f0"
                 }}
               >
-                Describe the problem, get structured guidance, and review what
-                may be needed before repair.
+                Add year, make, model, or VIN for better guidance.
               </p>
             </div>
           </div>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.15fr 0.85fr",
-            gap: 24,
-            marginTop: 24
-          }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 24, marginTop: 24 }}>
           <div
             style={{
               background: "white",
@@ -347,25 +313,71 @@ export default function App() {
               boxShadow: "0 6px 20px rgba(15, 23, 42, 0.05)"
             }}
           >
-            <h2
-              style={{
-                margin: "0 0 10px 0",
-                fontSize: 26
-              }}
-            >
+            <h2 style={{ margin: "0 0 10px 0", fontSize: 26 }}>
               Describe your repair problem
             </h2>
 
-            <p
+            <p style={{ margin: "0 0 18px 0", color: "#475569", lineHeight: 1.6 }}>
+              Add your vehicle details first, then describe the issue as clearly as possible.
+            </p>
+
+            <div
               style={{
-                margin: "0 0 18px 0",
-                color: "#475569",
-                lineHeight: 1.6
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: 12,
+                marginBottom: 16
               }}
             >
-              Include the symptoms, sounds, warning messages, and when the issue
-              happens. The more specific you are, the better the guidance.
-            </p>
+              <input
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                placeholder="Year"
+                style={{
+                  padding: 14,
+                  borderRadius: 12,
+                  border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
+                  fontSize: 15
+                }}
+              />
+              <input
+                value={make}
+                onChange={(e) => setMake(e.target.value)}
+                placeholder="Make"
+                style={{
+                  padding: 14,
+                  borderRadius: 12,
+                  border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
+                  fontSize: 15
+                }}
+              />
+              <input
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="Model"
+                style={{
+                  padding: 14,
+                  borderRadius: 12,
+                  border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
+                  fontSize: 15
+                }}
+              />
+              <input
+                value={vin}
+                onChange={(e) => setVin(e.target.value)}
+                placeholder="VIN"
+                style={{
+                  padding: 14,
+                  borderRadius: 12,
+                  border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
+                  fontSize: 15
+                }}
+              />
+            </div>
 
             <textarea
               value={problem}
@@ -397,8 +409,7 @@ export default function App() {
               }}
             >
               <div style={{ color: "#64748b", fontSize: 14 }}>
-                Example topics: no-start, overheating, brake noise, battery drain,
-                air suspension warnings.
+                VIN decoding can help auto-fill vehicle details and make results more relevant.
               </div>
 
               <button
@@ -438,12 +449,7 @@ export default function App() {
             ) : null}
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gap: 18
-            }}
-          >
+          <div style={{ display: "grid", gap: 18 }}>
             <SectionCard title="How FixPilot helps">
               <BulletList
                 items={[
@@ -462,7 +468,7 @@ export default function App() {
                   "Including exact warning messages",
                   "Describing sounds, smells, or vibrations",
                   "Explaining when the issue happens",
-                  "Mentioning recent repairs or battery changes"
+                  "Adding year, make, model, or VIN"
                 ]}
               />
             </SectionCard>
@@ -470,13 +476,7 @@ export default function App() {
         </div>
 
         {result ? (
-          <div
-            style={{
-              marginTop: 26,
-              display: "grid",
-              gap: 20
-            }}
-          >
+          <div style={{ marginTop: 26, display: "grid", gap: 20 }}>
             <div
               style={{
                 background: "white",
@@ -486,32 +486,18 @@ export default function App() {
                 boxShadow: "0 8px 20px rgba(15, 23, 42, 0.05)"
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 16,
-                  flexWrap: "wrap",
-                  alignItems: "center"
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
                 <div>
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: 30
-                    }}
-                  >
-                    {result.title}
-                  </h2>
-                  <p
-                    style={{
-                      margin: "10px 0 0 0",
-                      color: "#334155",
-                      fontSize: 17,
-                      lineHeight: 1.6
-                    }}
-                  >
+                  <h2 style={{ margin: 0, fontSize: 30 }}>{result.title}</h2>
+                  <p style={{ margin: "10px 0 0 0", color: "#334155", fontSize: 17, lineHeight: 1.6 }}>
+                    <strong>Vehicle:</strong> {result.vehicle}
+                  </p>
+                  {result.vin ? (
+                    <p style={{ margin: "8px 0 0 0", color: "#334155", fontSize: 15, lineHeight: 1.6 }}>
+                      <strong>VIN:</strong> {result.vin}
+                    </p>
+                  ) : null}
+                  <p style={{ margin: "8px 0 0 0", color: "#334155", fontSize: 17, lineHeight: 1.6 }}>
                     <strong>Likely issue:</strong> {result.likelyIssue}
                   </p>
                 </div>
@@ -520,13 +506,7 @@ export default function App() {
               </div>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 20
-              }}
-            >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <SectionCard title="Likely causes">
                 <BulletList items={result.likelyCauses} />
               </SectionCard>
@@ -544,13 +524,7 @@ export default function App() {
               </SectionCard>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 20
-              }}
-            >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <SectionCard title="When to get professional help">
                 <p style={{ margin: 0, color: "#334155", lineHeight: 1.8 }}>
                   {result.getHelpIf}
