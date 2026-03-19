@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -9,6 +9,7 @@ export default function App() {
     model: "",
     engine: "",
     vin: "",
+    zip: "",
     symptoms: "",
   });
 
@@ -99,6 +100,91 @@ export default function App() {
     result?.title?.toLowerCase().includes("more information needed") ||
     result?.confidence?.toLowerCase().includes("low");
 
+  const shopData = useMemo(() => {
+    const zip = formData.zip?.trim();
+    const title = result?.title?.toLowerCase() || "";
+    const summary = result?.summary?.toLowerCase() || "";
+    const combined = `${title} ${summary}`;
+
+    let categoryLabel = "general auto repair";
+    let searches = [
+      "auto repair shop",
+      "mechanic shop",
+      "car diagnostic shop",
+    ];
+
+    if (combined.includes("brake")) {
+      categoryLabel = "brake repair";
+      searches = [
+        "brake repair shop",
+        "auto repair brake service",
+        "brake and rotor repair",
+      ];
+    } else if (
+      combined.includes("cooling") ||
+      combined.includes("overheat") ||
+      combined.includes("radiator") ||
+      combined.includes("thermostat")
+    ) {
+      categoryLabel = "cooling system repair";
+      searches = [
+        "radiator repair shop",
+        "cooling system repair",
+        "engine overheating repair",
+      ];
+    } else if (
+      combined.includes("charging system") ||
+      combined.includes("battery") ||
+      combined.includes("alternator")
+    ) {
+      categoryLabel = "battery and charging system repair";
+      searches = [
+        "alternator repair shop",
+        "battery diagnostic shop",
+        "auto electrical repair",
+      ];
+    } else if (
+      combined.includes("ignition") ||
+      combined.includes("air/fuel") ||
+      combined.includes("misfire") ||
+      combined.includes("rough idle")
+    ) {
+      categoryLabel = "engine diagnostic repair";
+      searches = [
+        "engine diagnostic shop",
+        "check engine light repair",
+        "tune up and ignition repair",
+      ];
+    } else if (
+      combined.includes("suspension") ||
+      combined.includes("steering") ||
+      combined.includes("wheel bearing")
+    ) {
+      categoryLabel = "suspension and steering repair";
+      searches = [
+        "suspension repair shop",
+        "alignment and steering repair",
+        "wheel bearing repair shop",
+      ];
+    }
+
+    const locationText = zip ? ` near ${zip}` : " near me";
+
+    const shops = searches.map((search) => {
+      const mapsQuery = `${search}${locationText}`;
+      return {
+        label: search.replace(/\b\w/g, (c) => c.toUpperCase()),
+        url: `https://www.google.com/maps/search/${encodeURIComponent(mapsQuery)}`,
+      };
+    });
+
+    return {
+      categoryLabel,
+      shops,
+      hasZip: Boolean(zip),
+    };
+  }, [formData.zip, result]);
+
   return (
     <div className="app-shell">
       <style>{`
@@ -123,8 +209,6 @@ export default function App() {
           --red-text: #991b1b;
           --shadow: 0 18px 42px rgba(17, 24, 39, 0.08);
           --radius-xl: 24px;
-          --radius-lg: 18px;
-          --radius-md: 14px;
         }
 
         body {
@@ -159,7 +243,6 @@ export default function App() {
         .topbar {
           display: flex;
           align-items: center;
-          justify-content: space-between;
           gap: 18px;
           margin-bottom: 20px;
         }
@@ -203,8 +286,6 @@ export default function App() {
           padding: 28px;
           box-shadow: 0 22px 52px rgba(15, 23, 42, 0.18);
           margin-bottom: 24px;
-          overflow: hidden;
-          position: relative;
         }
 
         .hero h2 {
@@ -718,7 +799,7 @@ export default function App() {
             <span className="hero-tag">Guided diagnosis</span>
             <span className="hero-tag">Detailed tools</span>
             <span className="hero-tag">Parts lookup</span>
-            <span className="hero-tag">Nearby stores</span>
+            <span className="hero-tag">Local shop links</span>
           </div>
         </div>
 
@@ -782,16 +863,30 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="field">
-                <label htmlFor="vin">VIN</label>
-                <input
-                  id="vin"
-                  name="vin"
-                  type="text"
-                  value={formData.vin}
-                  onChange={handleChange}
-                  placeholder="Enter VIN if available"
-                />
+              <div className="grid-2">
+                <div className="field">
+                  <label htmlFor="vin">VIN</label>
+                  <input
+                    id="vin"
+                    name="vin"
+                    type="text"
+                    value={formData.vin}
+                    onChange={handleChange}
+                    placeholder="Enter VIN if available"
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="zip">ZIP Code</label>
+                  <input
+                    id="zip"
+                    name="zip"
+                    type="text"
+                    value={formData.zip}
+                    onChange={handleChange}
+                    placeholder="32444"
+                  />
+                </div>
               </div>
 
               <div className="field">
@@ -993,36 +1088,16 @@ export default function App() {
                           <div className="resource-item" key={index}>
                             <strong>{part.name}</strong>
                             <div className="link-row">
-                              <a
-                                className="chip-link"
-                                href={part.google}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
+                              <a className="chip-link" href={part.google} target="_blank" rel="noreferrer">
                                 Google
                               </a>
-                              <a
-                                className="chip-link"
-                                href={part.amazon}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
+                              <a className="chip-link" href={part.amazon} target="_blank" rel="noreferrer">
                                 Amazon
                               </a>
-                              <a
-                                className="chip-link"
-                                href={part.autozone}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
+                              <a className="chip-link" href={part.autozone} target="_blank" rel="noreferrer">
                                 AutoZone
                               </a>
-                              <a
-                                className="chip-link"
-                                href={part.rockauto}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
+                              <a className="chip-link" href={part.rockauto} target="_blank" rel="noreferrer">
                                 RockAuto
                               </a>
                             </div>
@@ -1035,11 +1110,17 @@ export default function App() {
                       <h3>Nearby Parts Stores</h3>
                       <div className="resource-grid">
                         <div className="resource-item">
-                          <strong>Find nearby stores</strong>
+                          <strong>
+                            {formData.zip?.trim()
+                              ? `Find nearby stores near ${formData.zip.trim()}`
+                              : "Find nearby stores"}
+                          </strong>
                           <div className="link-row">
                             <a
                               className="chip-link"
-                              href="https://www.google.com/maps/search/AutoZone+near+me"
+                              href={`https://www.google.com/maps/search/${encodeURIComponent(
+                                `AutoZone near ${formData.zip?.trim() || "me"}`
+                              )}`}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -1047,7 +1128,9 @@ export default function App() {
                             </a>
                             <a
                               className="chip-link"
-                              href="https://www.google.com/maps/search/O'Reilly+Auto+Parts+near+me"
+                              href={`https://www.google.com/maps/search/${encodeURIComponent(
+                                `O'Reilly Auto Parts near ${formData.zip?.trim() || "me"}`
+                              )}`}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -1055,7 +1138,9 @@ export default function App() {
                             </a>
                             <a
                               className="chip-link"
-                              href="https://www.google.com/maps/search/Advance+Auto+Parts+near+me"
+                              href={`https://www.google.com/maps/search/${encodeURIComponent(
+                                `Advance Auto Parts near ${formData.zip?.trim() || "me"}`
+                              )}`}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -1063,7 +1148,9 @@ export default function App() {
                             </a>
                             <a
                               className="chip-link"
-                              href="https://www.google.com/maps/search/NAPA+Auto+Parts+near+me"
+                              href={`https://www.google.com/maps/search/${encodeURIComponent(
+                                `NAPA Auto Parts near ${formData.zip?.trim() || "me"}`
+                              )}`}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -1071,7 +1158,9 @@ export default function App() {
                             </a>
                             <a
                               className="chip-link"
-                              href="https://www.google.com/maps/search/Walmart+Auto+Parts+near+me"
+                              href={`https://www.google.com/maps/search/${encodeURIComponent(
+                                `Walmart Auto Parts near ${formData.zip?.trim() || "me"}`
+                              )}`}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -1080,6 +1169,38 @@ export default function App() {
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="info-card">
+                      <h3>Local Repair Shops For This Problem</h3>
+                      <p className="subtext" style={{ marginBottom: 12 }}>
+                        Best next search for this issue:{" "}
+                        <strong>{shopData.categoryLabel}</strong>
+                        {!shopData.hasZip ? " near your location" : ` near ${formData.zip.trim()}`}.
+                      </p>
+
+                      <div className="resource-grid">
+                        {shopData.shops.map((shop, index) => (
+                          <div className="resource-item" key={index}>
+                            <strong>{shop.label}</strong>
+                            <div className="link-row">
+                              <a
+                                className="chip-link"
+                                href={shop.url}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Open in Google Maps
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <p className="subtext" style={{ marginTop: 12, marginBottom: 0 }}>
+                        This version opens local map searches based on the kind of repair you likely need.
+                        The next upgrade will turn this into a true ranked shop finder by rating and distance.
+                      </p>
                     </div>
 
                     <div className="info-card">
