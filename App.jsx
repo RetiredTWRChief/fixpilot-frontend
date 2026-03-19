@@ -476,65 +476,30 @@ export default function App() {
               <div className="grid-2">
                 <div className="field">
                   <label htmlFor="year">Year</label>
-                  <input
-                    id="year"
-                    name="year"
-                    type="text"
-                    value={formData.year}
-                    onChange={handleChange}
-                    placeholder="2019"
-                  />
+                  <input id="year" name="year" type="text" value={formData.year} onChange={handleChange} placeholder="2019" />
                 </div>
 
                 <div className="field">
                   <label htmlFor="make">Make</label>
-                  <input
-                    id="make"
-                    name="make"
-                    type="text"
-                    value={formData.make}
-                    onChange={handleChange}
-                    placeholder="Ram"
-                  />
+                  <input id="make" name="make" type="text" value={formData.make} onChange={handleChange} placeholder="Ram" />
                 </div>
               </div>
 
               <div className="grid-2">
                 <div className="field">
                   <label htmlFor="model">Model</label>
-                  <input
-                    id="model"
-                    name="model"
-                    type="text"
-                    value={formData.model}
-                    onChange={handleChange}
-                    placeholder="1500 Limited"
-                  />
+                  <input id="model" name="model" type="text" value={formData.model} onChange={handleChange} placeholder="1500 Limited" />
                 </div>
 
                 <div className="field">
                   <label htmlFor="engine">Engine</label>
-                  <input
-                    id="engine"
-                    name="engine"
-                    type="text"
-                    value={formData.engine}
-                    onChange={handleChange}
-                    placeholder="5.7L V8"
-                  />
+                  <input id="engine" name="engine" type="text" value={formData.engine} onChange={handleChange} placeholder="5.7L V8" />
                 </div>
               </div>
 
               <div className="field">
                 <label htmlFor="vin">VIN</label>
-                <input
-                  id="vin"
-                  name="vin"
-                  type="text"
-                  value={formData.vin}
-                  onChange={handleChange}
-                  placeholder="Enter VIN if available"
-                />
+                <input id="vin" name="vin" type="text" value={formData.vin} onChange={handleChange} placeholder="Enter VIN if available" />
               </div>
 
               <div className="field">
@@ -562,9 +527,7 @@ export default function App() {
               <div className="placeholder">
                 <h2>No diagnosis yet</h2>
                 <p>
-                  Enter the vehicle details and symptoms, then click{" "}
-                  <strong>Get Diagnosis</strong> to see a mechanic-style
-                  breakdown.
+                  Enter the vehicle details and symptoms, then click <strong>Get Diagnosis</strong> to see a mechanic-style breakdown.
                 </p>
               </div>
             ) : (
@@ -637,38 +600,10 @@ export default function App() {
                       <div className="resource-item" key={index}>
                         <strong>{part.name}</strong>
                         <div className="link-row">
-                          <a
-                            className="chip-link"
-                            href={part.google}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Google
-                          </a>
-                          <a
-                            className="chip-link"
-                            href={part.amazon}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Amazon
-                          </a>
-                          <a
-                            className="chip-link"
-                            href={part.autozone}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            AutoZone
-                          </a>
-                          <a
-                            className="chip-link"
-                            href={part.rockauto}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            RockAuto
-                          </a>
+                          <a className="chip-link" href={part.google} target="_blank" rel="noreferrer">Google</a>
+                          <a className="chip-link" href={part.amazon} target="_blank" rel="noreferrer">Amazon</a>
+                          <a className="chip-link" href={part.autozone} target="_blank" rel="noreferrer">AutoZone</a>
+                          <a className="chip-link" href={part.rockauto} target="_blank" rel="noreferrer">RockAuto</a>
                         </div>
                       </div>
                     ))}
@@ -682,14 +617,7 @@ export default function App() {
                       <div className="resource-item" key={index}>
                         <strong>{video.title}</strong>
                         <div className="link-row">
-                          <a
-                            className="chip-link"
-                            href={video.youtube}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Watch on YouTube
-                          </a>
+                          <a className="chip-link" href={video.youtube} target="_blank" rel="noreferrer">Watch on YouTube</a>
                         </div>
                       </div>
                     ))}
