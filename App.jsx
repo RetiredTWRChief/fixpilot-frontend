@@ -55,7 +55,7 @@ export default function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResult(null);
-    setExtraDetails("");
+setExtraDetails("It happens when ");
     setSelectedQuestion("");
     await runDiagnosis(formData);
   };
