@@ -511,7 +511,20 @@ export default function App() {
                 <BulletList items={result.likelyCauses} />
               </SectionCard>
 
-              <SectionCard title="Recommended steps">
+              <SectionCard title="Step-by-step guidance">
+  {result.steps?.map((step, index) => (
+    <div key={index} style={{ marginBottom: 16 }}>
+      <strong>{step.title}</strong>
+      <div>{step.instruction}</div>
+      <div style={{ color: "#2563eb", fontSize: 14 }}>
+        👉 What to look for: {step.whatToLookFor}
+      </div>
+      <div style={{ color: "#16a34a", fontSize: 14 }}>
+        ✔ What it means: {step.whatItMeans}
+      </div>
+    </div>
+  ))}
+</SectionCard>
                 <BulletList items={result.steps} />
               </SectionCard>
 
