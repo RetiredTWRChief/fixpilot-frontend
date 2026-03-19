@@ -534,9 +534,18 @@ export default function App() {
 
         .tool-item {
           display: grid;
-          grid-template-columns: 1fr auto;
+          grid-template-columns: 88px 1fr 120px;
           gap: 14px;
-          align-items: start;
+          align-items: center;
+        }
+
+        .tool-image img {
+          width: 88px;
+          height: 88px;
+          object-fit: cover;
+          border-radius: 14px;
+          border: 1px solid #dbeafe;
+          background: white;
         }
 
         .tool-main strong,
@@ -585,6 +594,12 @@ export default function App() {
           color: #1d4ed8;
           font-size: 0.88rem;
           font-weight: 800;
+        }
+
+        .tool-search-btn:hover,
+        .chip-link:hover {
+          transform: translateY(-1px);
+          text-decoration: none;
         }
 
         .link-row {
@@ -668,6 +683,12 @@ export default function App() {
         @media (max-width: 720px) {
           .tool-item {
             grid-template-columns: 1fr;
+          }
+
+          .tool-image img {
+            width: 100%;
+            max-width: 120px;
+            height: 120px;
           }
 
           .tool-actions {
@@ -922,26 +943,37 @@ export default function App() {
                     <div className="info-card">
                       <h3>Tools You May Need</h3>
                       <div className="tool-list">
-                        {result.tools?.map((tool, index) => (
-                          <div className="tool-item" key={index}>
-                            <div className="tool-main">
-                              <strong>{tool.name}</strong>
-                              {tool.spec && <div className="tool-spec">{tool.spec}</div>}
-                              <p>{tool.use}</p>
-                              {tool.note && <div className="tool-note">{tool.note}</div>}
+                        {result.tools?.map((tool, index) => {
+                          const imageUrl = `https://source.unsplash.com/200x200/?${encodeURIComponent(
+                            `${tool.name} tool`
+                          )}`;
+
+                          return (
+                            <div className="tool-item" key={index}>
+                              <div className="tool-image">
+                                <img src={imageUrl} alt={tool.name} />
+                              </div>
+
+                              <div className="tool-main">
+                                <strong>{tool.name}</strong>
+                                {tool.spec && <div className="tool-spec">{tool.spec}</div>}
+                                <p>{tool.use}</p>
+                                {tool.note && <div className="tool-note">{tool.note}</div>}
+                              </div>
+
+                              <div className="tool-actions">
+                                <a
+                                  className="tool-search-btn"
+                                  href={tool.searchLink}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Tool
+                                </a>
+                              </div>
                             </div>
-                            <div className="tool-actions">
-                              <a
-                                className="tool-search-btn"
-                                href={tool.searchLink}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Search Tool
-                              </a>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 
