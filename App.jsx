@@ -109,7 +109,6 @@ export default function App() {
         :root {
           --bg: #f3f7fc;
           --panel: #ffffff;
-          --panel-soft: #f8fbff;
           --text: #152033;
           --muted: #60708a;
           --line: #d9e4f2;
@@ -206,17 +205,6 @@ export default function App() {
           margin-bottom: 24px;
           overflow: hidden;
           position: relative;
-        }
-
-        .hero::after {
-          content: "";
-          position: absolute;
-          right: -40px;
-          top: -40px;
-          width: 220px;
-          height: 220px;
-          background: radial-gradient(circle, rgba(255,255,255,0.14), transparent 62%);
-          pointer-events: none;
         }
 
         .hero h2 {
@@ -345,7 +333,8 @@ export default function App() {
 
         .submit-btn,
         .secondary-btn,
-        .chip-link {
+        .chip-link,
+        .tool-search-btn {
           cursor: pointer;
           transition: 0.16s ease;
         }
@@ -543,17 +532,59 @@ export default function App() {
           padding: 14px;
         }
 
-        .tool-item strong,
+        .tool-item {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 14px;
+          align-items: start;
+        }
+
+        .tool-main strong,
         .resource-item strong {
           display: block;
           margin-bottom: 6px;
           color: #0f172a;
         }
 
-        .tool-item span {
+        .tool-spec {
+          display: inline-block;
+          margin-bottom: 8px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: #e0ecff;
+          color: #1d4ed8;
+          font-size: 0.83rem;
+          font-weight: 800;
+        }
+
+        .tool-main p {
+          margin: 0 0 8px;
           color: #475569;
           line-height: 1.6;
           font-size: 0.95rem;
+        }
+
+        .tool-note {
+          color: #64748b;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
+        .tool-actions {
+          min-width: 110px;
+        }
+
+        .tool-search-btn {
+          display: inline-block;
+          width: 100%;
+          text-align: center;
+          border: none;
+          padding: 10px 12px;
+          border-radius: 12px;
+          background: #e0ecff;
+          color: #1d4ed8;
+          font-size: 0.88rem;
+          font-weight: 800;
         }
 
         .link-row {
@@ -572,11 +603,6 @@ export default function App() {
           font-size: 0.86rem;
           font-weight: 800;
           display: inline-block;
-        }
-
-        .chip-link:hover {
-          transform: translateY(-1px);
-          text-decoration: none;
         }
 
         .question-box {
@@ -638,6 +664,16 @@ export default function App() {
           color: var(--muted);
           font-size: 0.9rem;
         }
+
+        @media (max-width: 720px) {
+          .tool-item {
+            grid-template-columns: 1fr;
+          }
+
+          .tool-actions {
+            min-width: 0;
+          }
+        }
       `}</style>
 
       <div className="container">
@@ -659,8 +695,8 @@ export default function App() {
           </p>
           <div className="hero-tags">
             <span className="hero-tag">Guided diagnosis</span>
+            <span className="hero-tag">Detailed tools</span>
             <span className="hero-tag">Parts lookup</span>
-            <span className="hero-tag">Video help</span>
             <span className="hero-tag">Nearby stores</span>
           </div>
         </div>
@@ -888,8 +924,22 @@ export default function App() {
                       <div className="tool-list">
                         {result.tools?.map((tool, index) => (
                           <div className="tool-item" key={index}>
-                            <strong>{tool.name}</strong>
-                            <span>{tool.description}</span>
+                            <div className="tool-main">
+                              <strong>{tool.name}</strong>
+                              {tool.spec && <div className="tool-spec">{tool.spec}</div>}
+                              <p>{tool.use}</p>
+                              {tool.note && <div className="tool-note">{tool.note}</div>}
+                            </div>
+                            <div className="tool-actions">
+                              <a
+                                className="tool-search-btn"
+                                href={tool.searchLink}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Search Tool
+                              </a>
+                            </div>
                           </div>
                         ))}
                       </div>
