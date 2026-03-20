@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -18,6 +18,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [shops, setShops] = useState([]);
+  const [shopsCategory, setShopsCategory] = useState("");
+  const [shopsLoading, setShopsLoading] = useState(false);
+  const [shopsError, setShopsError] = useState("");
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -58,6 +62,9 @@ export default function App() {
     setResult(null);
     setExtraDetails("");
     setSelectedQuestion("");
+    setShops([]);
+    setShopsError("");
+    setShopsCategory("");
     await runDiagnosis(formData);
   };
 
@@ -100,90 +107,191 @@ export default function App() {
     result?.title?.toLowerCase().includes("more information needed") ||
     result?.confidence?.toLowerCase().includes("low");
 
-  const shopData = useMemo(() => {
-    const zip = formData.zip?.trim();
-    const title = result?.title?.toLowerCase() || "";
-    const summary = result?.summary?.toLowerCase() || "";
-    const combined = `${title} ${summary}`;
+  useEffect(() => {
+    const fetchShops = async () => {
+      if (!result || needsMoreInfo || !formData.zip.trim()) {
+        setShops([]);
+        setShopsCategory("");
+        setShopsError("");
+        return;
+      }
 
-    let categoryLabel = "general auto repair";
-    let searches = [
-      "auto repair shop",
-      "mechanic shop",
-      "car diagnostic shop",
-    ];
+      setShopsLoading(true);
+      setShopsError("");
 
-    if (combined.includes("brake")) {
-      categoryLabel = "brake repair";
-      searches = [
-        "brake repair shop",
-        "auto repair brake service",
-        "brake and rotor repair",
-      ];
-    } else if (
-      combined.includes("cooling") ||
-      combined.includes("overheat") ||
-      combined.includes("radiator") ||
-      combined.includes("thermostat")
+      try {
+        const response = await fetch(`${API_URL}/shops`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            zip: formData.zip.trim(),
+            title: result.title,
+            summary: result.summary,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to find repair shops.");
+        }
+
+        setShops(data.shops || []);
+        setShopsCategory(data.categoryLabel || "");
+      } catch (err) {
+        setShops([]);
+        setShopsCategory("");
+        setShopsError(err.message || "Unable to find repair shops.");
+      } finally {
+        setShopsLoading(false);
+      }
+    };
+
+    fetchShops();
+  }, [result, needsMoreInfo, formData.zip]);
+
+  const shopHint = useMemo(() => {
+    if (!formData.zip.trim()) return "Enter a ZIP code to see ranked repair shops.";
+    if (shopsLoading) return "Finding the best-rated repair shops near your ZIP code...";
+    if (shopsError) return shopsError;
+    if (shops.length === 0) return "No ranked repair shops found yet for this ZIP code.";
+    return "";
+  }, [formData.zip, shopsLoading, shopsError, shops]);
+
+  const logoSvg = encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#2563eb"/>
+          <stop offset="100%" stop-color="#0f172a"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="18" fill="url(#g)"/>
+      <path d="M20 36c0-7 5-12 12-12 3 0 5.8.9 8 2.6l4-4 3.4 3.4-4 4A15.6 15.6 0 0 1 44 36h-5c0-4-3-7-7-7s-7 3-7 7h-5zm3 4h18v5H23z" fill="white"/>
+    </svg>
+  `);
+
+  const renderToolImage = (toolName) => {
+    const name = (toolName || "").toLowerCase();
+
+    if (
+      name.includes("socket") ||
+      name.includes("ratchet") ||
+      name.includes("extension")
     ) {
-      categoryLabel = "cooling system repair";
-      searches = [
-        "radiator repair shop",
-        "cooling system repair",
-        "engine overheating repair",
-      ];
-    } else if (
-      combined.includes("charging system") ||
-      combined.includes("battery") ||
-      combined.includes("alternator")
-    ) {
-      categoryLabel = "battery and charging system repair";
-      searches = [
-        "alternator repair shop",
-        "battery diagnostic shop",
-        "auto electrical repair",
-      ];
-    } else if (
-      combined.includes("ignition") ||
-      combined.includes("air/fuel") ||
-      combined.includes("misfire") ||
-      combined.includes("rough idle")
-    ) {
-      categoryLabel = "engine diagnostic repair";
-      searches = [
-        "engine diagnostic shop",
-        "check engine light repair",
-        "tune up and ignition repair",
-      ];
-    } else if (
-      combined.includes("suspension") ||
-      combined.includes("steering") ||
-      combined.includes("wheel bearing")
-    ) {
-      categoryLabel = "suspension and steering repair";
-      searches = [
-        "suspension repair shop",
-        "alignment and steering repair",
-        "wheel bearing repair shop",
-      ];
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <rect x="14" y="34" width="32" height="12" rx="6" fill="#1d4ed8" />
+          <rect x="44" y="37" width="18" height="6" rx="3" fill="#93c5fd" />
+          <circle cx="20" cy="40" r="6" fill="#dbeafe" />
+          <rect x="59" y="34" width="7" height="12" rx="2" fill="#cbd5e1" />
+        </svg>
+      );
     }
 
-    const locationText = zip ? ` near ${zip}` : " near me";
+    if (name.includes("multimeter") || name.includes("scanner")) {
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <rect x="24" y="14" width="32" height="52" rx="8" fill="#0f172a" />
+          <rect x="29" y="20" width="22" height="12" rx="3" fill="#93c5fd" />
+          <circle cx="40" cy="46" r="8" fill="#2563eb" />
+          <rect x="32" y="58" width="16" height="4" rx="2" fill="#cbd5e1" />
+        </svg>
+      );
+    }
 
-    const shops = searches.map((search) => {
-      const mapsQuery = `${search}${locationText}`;
-      return {
-        label: search.replace(/\b\w/g, (c) => c.toUpperCase()),
-        url: `https://www.google.com/maps/search/${encodeURIComponent(mapsQuery)}`,
-      };
-    });
+    if (
+      name.includes("flashlight") ||
+      name.includes("light")
+    ) {
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <rect x="22" y="30" width="28" height="18" rx="6" fill="#1e293b" />
+          <rect x="50" y="34" width="8" height="10" rx="2" fill="#64748b" />
+          <path d="M58 39l10-6v12z" fill="#fde68a" />
+        </svg>
+      );
+    }
 
-    return {
-      categoryLabel,
-      shops,
-      hasZip: Boolean(zip),
-    };
-  }, [formData.zip, result]);
+    if (
+      name.includes("brush") ||
+      name.includes("cleaning")
+    ) {
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <rect x="18" y="36" width="30" height="8" rx="4" fill="#92400e" />
+          <rect x="48" y="32" width="10" height="16" rx="2" fill="#2563eb" />
+          <path d="M58 33v14M62 33v14M66 33v14" stroke="#60a5fa" strokeWidth="3" />
+        </svg>
+      );
+    }
+
+    if (
+      name.includes("glove") ||
+      name.includes("gloves")
+    ) {
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <path
+            d="M30 60c-6 0-10-4-10-10V28c0-2 1-4 3-4s3 2 3 4v8h2V20c0-2 1-4 3-4s3 2 3 4v16h2V18c0-2 1-4 3-4s3 2 3 4v18h2V22c0-2 1-4 3-4s3 2 3 4v27c0 6-5 11-11 11H30z"
+            fill="#2563eb"
+          />
+        </svg>
+      );
+    }
+
+    if (
+      name.includes("pliers") ||
+      name.includes("clamp")
+    ) {
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <path d="M28 28l12 12-6 6-12-12z" fill="#1d4ed8" />
+          <path d="M52 28L40 40l6 6 12-12z" fill="#1d4ed8" />
+          <circle cx="40" cy="40" r="5" fill="#93c5fd" />
+          <path d="M34 46l-8 16M46 46l8 16" stroke="#64748b" strokeWidth="4" strokeLinecap="round" />
+        </svg>
+      );
+    }
+
+    if (
+      name.includes("jack") ||
+      name.includes("stands")
+    ) {
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <path d="M20 56h40l-8-14H28z" fill="#1d4ed8" />
+          <path d="M40 24l10 18H30z" fill="#93c5fd" />
+          <rect x="18" y="56" width="44" height="6" rx="3" fill="#0f172a" />
+        </svg>
+      );
+    }
+
+    if (
+      name.includes("brake cleaner") ||
+      name.includes("cleaner")
+    ) {
+      return (
+        <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+          <rect x="28" y="18" width="24" height="44" rx="6" fill="#2563eb" />
+          <rect x="33" y="14" width="14" height="8" rx="2" fill="#cbd5e1" />
+          <rect x="33" y="28" width="14" height="14" rx="3" fill="#dbeafe" />
+        </svg>
+      );
+    }
+
+    return (
+      <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
+        <circle cx="40" cy="40" r="26" fill="#dbeafe" />
+        <path
+          d="M48 20l4 4-8 10 4 4 10-8 4 4-9 13-4 1-14-14 1-4 12-10zM26 52l6 6-8 4 2-10z"
+          fill="#2563eb"
+        />
+      </svg>
+    );
+  };
 
   return (
     <div className="app-shell">
@@ -193,11 +301,12 @@ export default function App() {
         }
 
         :root {
-          --bg: #f3f7fc;
+          --bg: #f4f8fc;
           --panel: #ffffff;
+          --panel-soft: #f8fbff;
           --text: #152033;
-          --muted: #60708a;
-          --line: #d9e4f2;
+          --muted: #64748b;
+          --line: #dbe5f1;
           --blue: #2563eb;
           --blue-dark: #1d4ed8;
           --blue-soft: #eaf2ff;
@@ -207,8 +316,11 @@ export default function App() {
           --amber-text: #92400e;
           --red-soft: #fee2e2;
           --red-text: #991b1b;
-          --shadow: 0 18px 42px rgba(17, 24, 39, 0.08);
+          --shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+          --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.05);
           --radius-xl: 24px;
+          --radius-lg: 18px;
+          --radius-md: 14px;
         }
 
         body {
@@ -227,7 +339,7 @@ export default function App() {
         }
 
         a:hover {
-          text-decoration: underline;
+          text-decoration: none;
         }
 
         .app-shell {
@@ -236,13 +348,14 @@ export default function App() {
         }
 
         .container {
-          max-width: 1240px;
+          max-width: 1260px;
           margin: 0 auto;
         }
 
         .topbar {
           display: flex;
           align-items: center;
+          justify-content: space-between;
           gap: 18px;
           margin-bottom: 20px;
         }
@@ -254,52 +367,82 @@ export default function App() {
         }
 
         .brand-mark {
-          width: 52px;
-          height: 52px;
-          border-radius: 16px;
-          background: linear-gradient(135deg, #2563eb, #0f172a);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 12px 24px rgba(37, 99, 235, 0.24);
-          color: white;
-          font-size: 1.3rem;
-          font-weight: 800;
+          width: 56px;
+          height: 56px;
+          border-radius: 18px;
+          overflow: hidden;
+          box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
+          background: white;
+          flex-shrink: 0;
+        }
+
+        .brand-mark img {
+          width: 100%;
+          height: 100%;
+          display: block;
         }
 
         .brand-copy h1 {
           margin: 0;
-          font-size: 1.5rem;
-          line-height: 1.1;
+          font-size: 1.55rem;
+          line-height: 1.05;
+          letter-spacing: -0.02em;
         }
 
         .brand-copy p {
-          margin: 4px 0 0;
+          margin: 5px 0 0;
           color: var(--muted);
           font-size: 0.95rem;
         }
 
+        .topbar-badge {
+          padding: 10px 14px;
+          border-radius: 999px;
+          background: white;
+          border: 1px solid var(--line);
+          color: var(--blue-dark);
+          font-size: 0.88rem;
+          font-weight: 800;
+          box-shadow: var(--shadow-soft);
+          white-space: nowrap;
+        }
+
         .hero {
+          position: relative;
+          overflow: hidden;
           background: linear-gradient(135deg, #0f172a, #1f2937 55%, #1d4ed8 130%);
           color: white;
           border-radius: var(--radius-xl);
-          padding: 28px;
-          box-shadow: 0 22px 52px rgba(15, 23, 42, 0.18);
+          padding: 30px;
+          box-shadow: 0 24px 56px rgba(15, 23, 42, 0.18);
           margin-bottom: 24px;
+        }
+
+        .hero::after {
+          content: "";
+          position: absolute;
+          right: -60px;
+          top: -60px;
+          width: 220px;
+          height: 220px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 62%);
+          pointer-events: none;
         }
 
         .hero h2 {
           margin: 0 0 10px;
           font-size: 2rem;
-          line-height: 1.15;
-          max-width: 780px;
+          line-height: 1.1;
+          max-width: 820px;
+          letter-spacing: -0.03em;
         }
 
         .hero p {
           margin: 0;
-          color: #d7e3f4;
+          color: #d8e4f5;
           line-height: 1.7;
-          max-width: 860px;
+          max-width: 880px;
           font-size: 1rem;
         }
 
@@ -314,10 +457,11 @@ export default function App() {
           padding: 8px 12px;
           border-radius: 999px;
           background: rgba(255,255,255,0.12);
-          border: 1px solid rgba(255,255,255,0.14);
+          border: 1px solid rgba(255,255,255,0.16);
           color: white;
           font-size: 0.86rem;
           font-weight: 700;
+          backdrop-filter: blur(4px);
         }
 
         .layout {
@@ -326,7 +470,7 @@ export default function App() {
           gap: 24px;
         }
 
-        @media (min-width: 980px) {
+        @media (min-width: 1020px) {
           .layout {
             grid-template-columns: 400px 1fr;
             align-items: start;
@@ -355,6 +499,7 @@ export default function App() {
           margin-top: 0;
           margin-bottom: 12px;
           font-size: 1.08rem;
+          letter-spacing: -0.01em;
         }
 
         .panel-title {
@@ -415,7 +560,8 @@ export default function App() {
         .submit-btn,
         .secondary-btn,
         .chip-link,
-        .tool-search-btn {
+        .tool-search-btn,
+        .shop-action {
           cursor: pointer;
           transition: 0.16s ease;
         }
@@ -432,7 +578,10 @@ export default function App() {
           box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
         }
 
-        .submit-btn:hover {
+        .submit-btn:hover,
+        .secondary-btn:hover,
+        .tool-search-btn:hover,
+        .shop-action:hover {
           transform: translateY(-1px);
         }
 
@@ -502,8 +651,9 @@ export default function App() {
 
         .top-summary h2 {
           margin: 0 0 10px;
-          font-size: 1.5rem;
-          line-height: 1.2;
+          font-size: 1.58rem;
+          line-height: 1.18;
+          letter-spacing: -0.02em;
         }
 
         .top-summary p {
@@ -594,49 +744,64 @@ export default function App() {
         }
 
         .tool-list,
-        .resource-grid {
+        .resource-grid,
+        .shop-grid {
           display: grid;
           gap: 12px;
         }
 
         @media (min-width: 900px) {
-          .resource-grid {
+          .resource-grid,
+          .shop-grid {
             grid-template-columns: 1fr 1fr;
           }
         }
 
         .tool-item,
-        .resource-item {
-          background: #f8fbff;
+        .resource-item,
+        .shop-card {
+          background: var(--panel-soft);
           border: 1px solid #dde8f5;
-          border-radius: 16px;
+          border-radius: 18px;
           padding: 14px;
+          box-shadow: var(--shadow-soft);
         }
 
         .tool-item {
           display: grid;
-          grid-template-columns: 88px 1fr 120px;
+          grid-template-columns: 92px 1fr 120px;
           gap: 14px;
           align-items: center;
         }
 
-        .tool-image img {
-          width: 88px;
-          height: 88px;
-          object-fit: cover;
-          border-radius: 14px;
+        .tool-image {
+          width: 92px;
+          height: 92px;
+          border-radius: 16px;
           border: 1px solid #dbeafe;
-          background: white;
+          background: linear-gradient(180deg, #ffffff, #eff6ff);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .tool-svg {
+          width: 72px;
+          height: 72px;
+          display: block;
         }
 
         .tool-main strong,
-        .resource-item strong {
+        .resource-item strong,
+        .shop-card strong {
           display: block;
           margin-bottom: 6px;
           color: #0f172a;
         }
 
-        .tool-spec {
+        .tool-spec,
+        .shop-badge {
           display: inline-block;
           margin-bottom: 8px;
           padding: 6px 10px;
@@ -654,10 +819,11 @@ export default function App() {
           font-size: 0.95rem;
         }
 
-        .tool-note {
+        .tool-note,
+        .shop-meta {
           color: #64748b;
           font-size: 0.9rem;
-          line-height: 1.5;
+          line-height: 1.55;
         }
 
         .tool-actions {
@@ -675,19 +841,6 @@ export default function App() {
           color: #1d4ed8;
           font-size: 0.88rem;
           font-weight: 800;
-        }
-
-        .tool-search-btn:hover,
-        .chip-link:hover {
-          transform: translateY(-1px);
-          text-decoration: none;
-        }
-
-        .link-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 8px;
         }
 
         .chip-link {
@@ -744,6 +897,84 @@ export default function App() {
           line-height: 1.5;
         }
 
+        .shop-card {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .shop-top {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        .shop-rank {
+          width: 32px;
+          height: 32px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+          font-size: 0.88rem;
+          flex-shrink: 0;
+          box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+        }
+
+        .shop-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 4px;
+        }
+
+        .shop-action {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 12px;
+          border-radius: 12px;
+          font-size: 0.88rem;
+          font-weight: 800;
+          border: 1px solid #dbeafe;
+          background: #eff6ff;
+          color: #1d4ed8;
+          min-width: 112px;
+        }
+
+        .shop-action.primary {
+          background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+          color: white;
+          border: none;
+        }
+
+        .section-header-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+
+        .section-header-row h3 {
+          margin-bottom: 0;
+        }
+
+        .section-pill {
+          padding: 7px 10px;
+          border-radius: 999px;
+          background: #eff6ff;
+          color: #1d4ed8;
+          font-size: 0.82rem;
+          font-weight: 800;
+          border: 1px solid #dbeafe;
+          white-space: nowrap;
+        }
+
         .mechanic-closing {
           background: #eff6ff;
           border: 1px solid #bfdbfe;
@@ -761,19 +992,27 @@ export default function App() {
           font-size: 0.9rem;
         }
 
-        @media (max-width: 720px) {
+        @media (max-width: 760px) {
+          .topbar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .topbar-badge {
+            white-space: normal;
+          }
+
           .tool-item {
             grid-template-columns: 1fr;
           }
 
-          .tool-image img {
-            width: 100%;
-            max-width: 120px;
-            height: 120px;
-          }
-
           .tool-actions {
             min-width: 0;
+          }
+
+          .section-header-row {
+            flex-direction: column;
+            align-items: flex-start;
           }
         }
       `}</style>
@@ -781,12 +1020,19 @@ export default function App() {
       <div className="container">
         <div className="topbar">
           <div className="brand">
-            <div className="brand-mark">FP</div>
+            <div className="brand-mark">
+              <img
+                src={`data:image/svg+xml;charset=utf-8,${logoSvg}`}
+                alt="FixPilot logo"
+              />
+            </div>
             <div className="brand-copy">
               <h1>FixPilot</h1>
               <p>Mechanic-style vehicle diagnosis assistant</p>
             </div>
           </div>
+
+          <div className="topbar-badge">Built to help you diagnose smarter before you spend money</div>
         </div>
 
         <div className="hero">
@@ -798,8 +1044,8 @@ export default function App() {
           <div className="hero-tags">
             <span className="hero-tag">Guided diagnosis</span>
             <span className="hero-tag">Detailed tools</span>
+            <span className="hero-tag">Ranked repair shops</span>
             <span className="hero-tag">Parts lookup</span>
-            <span className="hero-tag">Local shop links</span>
           </div>
         </div>
 
@@ -814,78 +1060,36 @@ export default function App() {
               <div className="grid-2">
                 <div className="field">
                   <label htmlFor="year">Year</label>
-                  <input
-                    id="year"
-                    name="year"
-                    type="text"
-                    value={formData.year}
-                    onChange={handleChange}
-                    placeholder="2019"
-                  />
+                  <input id="year" name="year" type="text" value={formData.year} onChange={handleChange} placeholder="2019" />
                 </div>
 
                 <div className="field">
                   <label htmlFor="make">Make</label>
-                  <input
-                    id="make"
-                    name="make"
-                    type="text"
-                    value={formData.make}
-                    onChange={handleChange}
-                    placeholder="Ram"
-                  />
+                  <input id="make" name="make" type="text" value={formData.make} onChange={handleChange} placeholder="Ram" />
                 </div>
               </div>
 
               <div className="grid-2">
                 <div className="field">
                   <label htmlFor="model">Model</label>
-                  <input
-                    id="model"
-                    name="model"
-                    type="text"
-                    value={formData.model}
-                    onChange={handleChange}
-                    placeholder="1500 Limited"
-                  />
+                  <input id="model" name="model" type="text" value={formData.model} onChange={handleChange} placeholder="1500 Limited" />
                 </div>
 
                 <div className="field">
                   <label htmlFor="engine">Engine</label>
-                  <input
-                    id="engine"
-                    name="engine"
-                    type="text"
-                    value={formData.engine}
-                    onChange={handleChange}
-                    placeholder="5.7L V8"
-                  />
+                  <input id="engine" name="engine" type="text" value={formData.engine} onChange={handleChange} placeholder="5.7L V8" />
                 </div>
               </div>
 
               <div className="grid-2">
                 <div className="field">
                   <label htmlFor="vin">VIN</label>
-                  <input
-                    id="vin"
-                    name="vin"
-                    type="text"
-                    value={formData.vin}
-                    onChange={handleChange}
-                    placeholder="Enter VIN if available"
-                  />
+                  <input id="vin" name="vin" type="text" value={formData.vin} onChange={handleChange} placeholder="Enter VIN if available" />
                 </div>
 
                 <div className="field">
                   <label htmlFor="zip">ZIP Code</label>
-                  <input
-                    id="zip"
-                    name="zip"
-                    type="text"
-                    value={formData.zip}
-                    onChange={handleChange}
-                    placeholder="32444"
-                  />
+                  <input id="zip" name="zip" type="text" value={formData.zip} onChange={handleChange} placeholder="32444" />
                 </div>
               </div>
 
@@ -914,8 +1118,7 @@ export default function App() {
               <div className="placeholder">
                 <h3>No diagnosis yet</h3>
                 <p>
-                  Enter the vehicle details and symptoms, then click{" "}
-                  <strong>Get Diagnosis</strong> to start the conversation.
+                  Enter the vehicle details and symptoms, then click <strong>Get Diagnosis</strong> to start the conversation.
                 </p>
               </div>
             ) : (
@@ -924,14 +1127,11 @@ export default function App() {
                   {result.mechanicIntro && (
                     <div className="mechanic-intro">{result.mechanicIntro}</div>
                   )}
-
                   <h2>{result.title}</h2>
                   <p>{result.summary}</p>
 
                   <div className="badge-row">
-                    <span className="badge confidence">
-                      Confidence: {result.confidence}
-                    </span>
+                    <span className="badge confidence">Confidence: {result.confidence}</span>
                     <span className={difficultyClass(result.difficulty)}>
                       Difficulty: {result.difficulty}
                     </span>
@@ -988,14 +1188,8 @@ export default function App() {
                           />
                         </div>
 
-                        <button
-                          className="submit-btn"
-                          type="submit"
-                          disabled={loading}
-                        >
-                          {loading
-                            ? "Updating Diagnosis..."
-                            : "Update Diagnosis With More Detail"}
+                        <button className="submit-btn" type="submit" disabled={loading}>
+                          {loading ? "Updating Diagnosis..." : "Update Diagnosis With More Detail"}
                         </button>
 
                         <button
@@ -1036,39 +1230,37 @@ export default function App() {
                     </div>
 
                     <div className="info-card">
-                      <h3>Tools You May Need</h3>
+                      <div className="section-header-row">
+                        <h3>Tools You May Need</h3>
+                        <div className="section-pill">Visual tool cards</div>
+                      </div>
+
                       <div className="tool-list">
-                        {result.tools?.map((tool, index) => {
-                          const imageUrl = `https://source.unsplash.com/200x200/?${encodeURIComponent(
-                            `${tool.name} tool`
-                          )}`;
-
-                          return (
-                            <div className="tool-item" key={index}>
-                              <div className="tool-image">
-                                <img src={imageUrl} alt={tool.name} />
-                              </div>
-
-                              <div className="tool-main">
-                                <strong>{tool.name}</strong>
-                                {tool.spec && <div className="tool-spec">{tool.spec}</div>}
-                                <p>{tool.use}</p>
-                                {tool.note && <div className="tool-note">{tool.note}</div>}
-                              </div>
-
-                              <div className="tool-actions">
-                                <a
-                                  className="tool-search-btn"
-                                  href={tool.searchLink}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  View Tool
-                                </a>
-                              </div>
+                        {result.tools?.map((tool, index) => (
+                          <div className="tool-item" key={index}>
+                            <div className="tool-image">
+                              {renderToolImage(tool.name)}
                             </div>
-                          );
-                        })}
+
+                            <div className="tool-main">
+                              <strong>{tool.name}</strong>
+                              {tool.spec && <div className="tool-spec">{tool.spec}</div>}
+                              <p>{tool.use}</p>
+                              {tool.note && <div className="tool-note">{tool.note}</div>}
+                            </div>
+
+                            <div className="tool-actions">
+                              <a
+                                className="tool-search-btn"
+                                href={tool.searchLink}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                View Tool
+                              </a>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -1088,18 +1280,10 @@ export default function App() {
                           <div className="resource-item" key={index}>
                             <strong>{part.name}</strong>
                             <div className="link-row">
-                              <a className="chip-link" href={part.google} target="_blank" rel="noreferrer">
-                                Google
-                              </a>
-                              <a className="chip-link" href={part.amazon} target="_blank" rel="noreferrer">
-                                Amazon
-                              </a>
-                              <a className="chip-link" href={part.autozone} target="_blank" rel="noreferrer">
-                                AutoZone
-                              </a>
-                              <a className="chip-link" href={part.rockauto} target="_blank" rel="noreferrer">
-                                RockAuto
-                              </a>
+                              <a className="chip-link" href={part.google} target="_blank" rel="noreferrer">Google</a>
+                              <a className="chip-link" href={part.amazon} target="_blank" rel="noreferrer">Amazon</a>
+                              <a className="chip-link" href={part.autozone} target="_blank" rel="noreferrer">AutoZone</a>
+                              <a className="chip-link" href={part.rockauto} target="_blank" rel="noreferrer">RockAuto</a>
                             </div>
                           </div>
                         ))}
@@ -1107,100 +1291,66 @@ export default function App() {
                     </div>
 
                     <div className="info-card">
-                      <h3>Nearby Parts Stores</h3>
-                      <div className="resource-grid">
-                        <div className="resource-item">
-                          <strong>
-                            {formData.zip?.trim()
-                              ? `Find nearby stores near ${formData.zip.trim()}`
-                              : "Find nearby stores"}
-                          </strong>
-                          <div className="link-row">
-                            <a
-                              className="chip-link"
-                              href={`https://www.google.com/maps/search/${encodeURIComponent(
-                                `AutoZone near ${formData.zip?.trim() || "me"}`
-                              )}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              AutoZone
-                            </a>
-                            <a
-                              className="chip-link"
-                              href={`https://www.google.com/maps/search/${encodeURIComponent(
-                                `O'Reilly Auto Parts near ${formData.zip?.trim() || "me"}`
-                              )}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              O'Reilly
-                            </a>
-                            <a
-                              className="chip-link"
-                              href={`https://www.google.com/maps/search/${encodeURIComponent(
-                                `Advance Auto Parts near ${formData.zip?.trim() || "me"}`
-                              )}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Advance Auto
-                            </a>
-                            <a
-                              className="chip-link"
-                              href={`https://www.google.com/maps/search/${encodeURIComponent(
-                                `NAPA Auto Parts near ${formData.zip?.trim() || "me"}`
-                              )}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              NAPA
-                            </a>
-                            <a
-                              className="chip-link"
-                              href={`https://www.google.com/maps/search/${encodeURIComponent(
-                                `Walmart Auto Parts near ${formData.zip?.trim() || "me"}`
-                              )}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Walmart
-                            </a>
-                          </div>
-                        </div>
+                      <div className="section-header-row">
+                        <h3>Ranked Repair Shops For This Problem</h3>
+                        {shopsCategory && (
+                          <div className="section-pill">{shopsCategory}</div>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="info-card">
-                      <h3>Local Repair Shops For This Problem</h3>
                       <p className="subtext" style={{ marginBottom: 12 }}>
-                        Best next search for this issue:{" "}
-                        <strong>{shopData.categoryLabel}</strong>
-                        {!shopData.hasZip ? " near your location" : ` near ${formData.zip.trim()}`}.
+                        {shopsCategory
+                          ? `Showing the highest-rated matches for ${shopsCategory.toLowerCase()} within about 100 miles of ${formData.zip.trim()}.`
+                          : "Repair shop results will appear here after the search finishes."}
                       </p>
 
-                      <div className="resource-grid">
-                        {shopData.shops.map((shop, index) => (
-                          <div className="resource-item" key={index}>
-                            <strong>{shop.label}</strong>
-                            <div className="link-row">
+                      {shopHint && (
+                        <p className="subtext" style={{ marginBottom: 12 }}>
+                          {shopHint}
+                        </p>
+                      )}
+
+                      <div className="shop-grid">
+                        {shops.map((shop, index) => (
+                          <div className="shop-card" key={shop.id || index}>
+                            <div className="shop-top">
+                              <div>
+                                <strong>{shop.name}</strong>
+                                <div className="shop-badge">
+                                  ⭐ {Number(shop.rating || 0).toFixed(1)} • {shop.distanceMiles} miles away
+                                </div>
+                              </div>
+                              <div className="shop-rank">#{index + 1}</div>
+                            </div>
+
+                            <div className="shop-meta">{shop.address}</div>
+                            {shop.phone && <div className="shop-meta">{shop.phone}</div>}
+                            <div className="shop-meta">
+                              Based on {shop.userRatingCount || 0} customer ratings
+                            </div>
+
+                            <div className="shop-actions">
                               <a
-                                className="chip-link"
-                                href={shop.url}
+                                className="shop-action primary"
+                                href={shop.mapsUrl}
                                 target="_blank"
                                 rel="noreferrer"
                               >
-                                Open in Google Maps
+                                Open Map
                               </a>
+
+                              {shop.phone && (
+                                <a
+                                  className="shop-action"
+                                  href={`tel:${shop.phone}`}
+                                >
+                                  Call Shop
+                                </a>
+                              )}
                             </div>
                           </div>
                         ))}
                       </div>
-
-                      <p className="subtext" style={{ marginTop: 12, marginBottom: 0 }}>
-                        This version opens local map searches based on the kind of repair you likely need.
-                        The next upgrade will turn this into a true ranked shop finder by rating and distance.
-                      </p>
                     </div>
 
                     <div className="info-card">
@@ -1210,12 +1360,7 @@ export default function App() {
                           <div className="resource-item" key={index}>
                             <strong>{video.title}</strong>
                             <div className="link-row">
-                              <a
-                                className="chip-link"
-                                href={video.youtube}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
+                              <a className="chip-link" href={video.youtube} target="_blank" rel="noreferrer">
                                 Watch on YouTube
                               </a>
                             </div>
