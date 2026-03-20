@@ -954,7 +954,7 @@ export default function App() {
         <div className="topbar">
           <div className="brand">
             <div className="brand-mark">
-              <img src="/logo.svg" alt="FixPilot logo" />
+             <img src="/logo.png" alt="FixPilot logo" /> 
             </div>
             <div className="brand-copy">
               <h1>FixPilot</h1>
