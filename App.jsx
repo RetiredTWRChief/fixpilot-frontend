@@ -160,19 +160,6 @@ export default function App() {
     return "";
   }, [formData.zip, shopsLoading, shopsError, shops]);
 
-  const logoSvg = encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-      <defs>
-        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#2563eb"/>
-          <stop offset="100%" stop-color="#0f172a"/>
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="18" fill="url(#g)"/>
-      <path d="M20 36c0-7 5-12 12-12 3 0 5.8.9 8 2.6l4-4 3.4 3.4-4 4A15.6 15.6 0 0 1 44 36h-5c0-4-3-7-7-7s-7 3-7 7h-5zm3 4h18v5H23z" fill="white"/>
-    </svg>
-  `);
-
   const renderToolImage = (toolName) => {
     const name = (toolName || "").toLowerCase();
 
@@ -202,10 +189,7 @@ export default function App() {
       );
     }
 
-    if (
-      name.includes("flashlight") ||
-      name.includes("light")
-    ) {
+    if (name.includes("flashlight") || name.includes("light")) {
       return (
         <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
           <rect x="22" y="30" width="28" height="18" rx="6" fill="#1e293b" />
@@ -215,10 +199,7 @@ export default function App() {
       );
     }
 
-    if (
-      name.includes("brush") ||
-      name.includes("cleaning")
-    ) {
+    if (name.includes("brush") || name.includes("cleaning")) {
       return (
         <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
           <rect x="18" y="36" width="30" height="8" rx="4" fill="#92400e" />
@@ -228,10 +209,7 @@ export default function App() {
       );
     }
 
-    if (
-      name.includes("glove") ||
-      name.includes("gloves")
-    ) {
+    if (name.includes("glove")) {
       return (
         <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
           <path
@@ -242,10 +220,7 @@ export default function App() {
       );
     }
 
-    if (
-      name.includes("pliers") ||
-      name.includes("clamp")
-    ) {
+    if (name.includes("pliers") || name.includes("clamp")) {
       return (
         <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
           <path d="M28 28l12 12-6 6-12-12z" fill="#1d4ed8" />
@@ -256,10 +231,7 @@ export default function App() {
       );
     }
 
-    if (
-      name.includes("jack") ||
-      name.includes("stands")
-    ) {
+    if (name.includes("jack") || name.includes("stands")) {
       return (
         <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
           <path d="M20 56h40l-8-14H28z" fill="#1d4ed8" />
@@ -269,10 +241,7 @@ export default function App() {
       );
     }
 
-    if (
-      name.includes("brake cleaner") ||
-      name.includes("cleaner")
-    ) {
+    if (name.includes("cleaner")) {
       return (
         <svg viewBox="0 0 80 80" className="tool-svg" aria-hidden="true">
           <rect x="28" y="18" width="24" height="44" rx="6" fill="#2563eb" />
@@ -296,9 +265,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <style>{`
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         :root {
           --bg: #f4f8fc;
@@ -319,8 +286,6 @@ export default function App() {
           --shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
           --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.05);
           --radius-xl: 24px;
-          --radius-lg: 18px;
-          --radius-md: 14px;
         }
 
         body {
@@ -335,10 +300,6 @@ export default function App() {
 
         a {
           color: var(--blue-dark);
-          text-decoration: none;
-        }
-
-        a:hover {
           text-decoration: none;
         }
 
@@ -380,6 +341,7 @@ export default function App() {
           width: 100%;
           height: 100%;
           display: block;
+          object-fit: cover;
         }
 
         .brand-copy h1 {
@@ -461,7 +423,6 @@ export default function App() {
           color: white;
           font-size: 0.86rem;
           font-weight: 700;
-          backdrop-filter: blur(4px);
         }
 
         .layout {
@@ -477,10 +438,7 @@ export default function App() {
           }
         }
 
-        .panel,
-        .info-card,
-        .conversation-box,
-        .placeholder {
+        .panel, .info-card, .conversation-box, .placeholder {
           background: var(--panel);
           border: 1px solid var(--line);
           border-radius: var(--radius-xl);
@@ -493,13 +451,10 @@ export default function App() {
           top: 18px;
         }
 
-        .panel h3,
-        .info-card h3,
-        .conversation-box h3 {
+        .panel h3, .info-card h3, .conversation-box h3 {
           margin-top: 0;
           margin-bottom: 12px;
           font-size: 1.08rem;
-          letter-spacing: -0.01em;
         }
 
         .panel-title {
@@ -514,9 +469,7 @@ export default function App() {
           font-size: 0.95rem;
         }
 
-        .field {
-          margin-bottom: 14px;
-        }
+        .field { margin-bottom: 14px; }
 
         .field label {
           display: block;
@@ -526,8 +479,7 @@ export default function App() {
           color: #23314b;
         }
 
-        .field input,
-        .field textarea {
+        .field input, .field textarea {
           width: 100%;
           border: 1px solid #cfdced;
           background: white;
@@ -539,8 +491,7 @@ export default function App() {
           transition: 0.18s ease;
         }
 
-        .field input:focus,
-        .field textarea:focus {
+        .field input:focus, .field textarea:focus {
           border-color: var(--blue);
           box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
         }
@@ -557,11 +508,7 @@ export default function App() {
           gap: 12px;
         }
 
-        .submit-btn,
-        .secondary-btn,
-        .chip-link,
-        .tool-search-btn,
-        .shop-action {
+        .submit-btn, .secondary-btn, .chip-link, .tool-search-btn, .shop-action {
           cursor: pointer;
           transition: 0.16s ease;
         }
@@ -578,10 +525,7 @@ export default function App() {
           box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
         }
 
-        .submit-btn:hover,
-        .secondary-btn:hover,
-        .tool-search-btn:hover,
-        .shop-action:hover {
+        .submit-btn:hover, .secondary-btn:hover, .tool-search-btn:hover, .shop-action:hover {
           transform: translateY(-1px);
         }
 
@@ -710,13 +654,11 @@ export default function App() {
           }
         }
 
-        .info-card,
-        .conversation-box {
+        .info-card, .conversation-box {
           padding: 20px;
         }
 
-        .info-card p,
-        .conversation-box p {
+        .info-card p, .conversation-box p {
           margin: 0;
           line-height: 1.7;
           color: #334155;
@@ -743,23 +685,18 @@ export default function App() {
           line-height: 1.65;
         }
 
-        .tool-list,
-        .resource-grid,
-        .shop-grid {
+        .tool-list, .resource-grid, .shop-grid {
           display: grid;
           gap: 12px;
         }
 
         @media (min-width: 900px) {
-          .resource-grid,
-          .shop-grid {
+          .resource-grid, .shop-grid {
             grid-template-columns: 1fr 1fr;
           }
         }
 
-        .tool-item,
-        .resource-item,
-        .shop-card {
+        .tool-item, .resource-item, .shop-card {
           background: var(--panel-soft);
           border: 1px solid #dde8f5;
           border-radius: 18px;
@@ -792,16 +729,13 @@ export default function App() {
           display: block;
         }
 
-        .tool-main strong,
-        .resource-item strong,
-        .shop-card strong {
+        .tool-main strong, .resource-item strong, .shop-card strong {
           display: block;
           margin-bottom: 6px;
           color: #0f172a;
         }
 
-        .tool-spec,
-        .shop-badge {
+        .tool-spec, .shop-badge {
           display: inline-block;
           margin-bottom: 8px;
           padding: 6px 10px;
@@ -819,8 +753,7 @@ export default function App() {
           font-size: 0.95rem;
         }
 
-        .tool-note,
-        .shop-meta {
+        .tool-note, .shop-meta {
           color: #64748b;
           font-size: 0.9rem;
           line-height: 1.55;
@@ -1021,10 +954,7 @@ export default function App() {
         <div className="topbar">
           <div className="brand">
             <div className="brand-mark">
-              <img
-                src={`data:image/svg+xml;charset=utf-8,${logoSvg}`}
-                alt="FixPilot logo"
-              />
+              <img src="/logo.svg" alt="FixPilot logo" />
             </div>
             <div className="brand-copy">
               <h1>FixPilot</h1>
@@ -1062,7 +992,6 @@ export default function App() {
                   <label htmlFor="year">Year</label>
                   <input id="year" name="year" type="text" value={formData.year} onChange={handleChange} placeholder="2019" />
                 </div>
-
                 <div className="field">
                   <label htmlFor="make">Make</label>
                   <input id="make" name="make" type="text" value={formData.make} onChange={handleChange} placeholder="Ram" />
@@ -1074,7 +1003,6 @@ export default function App() {
                   <label htmlFor="model">Model</label>
                   <input id="model" name="model" type="text" value={formData.model} onChange={handleChange} placeholder="1500 Limited" />
                 </div>
-
                 <div className="field">
                   <label htmlFor="engine">Engine</label>
                   <input id="engine" name="engine" type="text" value={formData.engine} onChange={handleChange} placeholder="5.7L V8" />
@@ -1086,7 +1014,6 @@ export default function App() {
                   <label htmlFor="vin">VIN</label>
                   <input id="vin" name="vin" type="text" value={formData.vin} onChange={handleChange} placeholder="Enter VIN if available" />
                 </div>
-
                 <div className="field">
                   <label htmlFor="zip">ZIP Code</label>
                   <input id="zip" name="zip" type="text" value={formData.zip} onChange={handleChange} placeholder="32444" />
@@ -1212,17 +1139,14 @@ export default function App() {
                         <h3>Why This Might Be Happening</h3>
                         <p>{result.why}</p>
                       </div>
-
                       <div className="info-card">
                         <h3>What To Check First</h3>
                         <p>{result.firstCheck}</p>
                       </div>
-
                       <div className="info-card warning-card">
                         <h3>Safety Warning</h3>
                         <p>{result.safety}</p>
                       </div>
-
                       <div className="info-card stop-card">
                         <h3>When To Stop And Call A Mechanic</h3>
                         <p>{result.whenToStop}</p>
@@ -1293,9 +1217,7 @@ export default function App() {
                     <div className="info-card">
                       <div className="section-header-row">
                         <h3>Ranked Repair Shops For This Problem</h3>
-                        {shopsCategory && (
-                          <div className="section-pill">{shopsCategory}</div>
-                        )}
+                        {shopsCategory && <div className="section-pill">{shopsCategory}</div>}
                       </div>
 
                       <p className="subtext" style={{ marginBottom: 12 }}>
@@ -1330,20 +1252,11 @@ export default function App() {
                             </div>
 
                             <div className="shop-actions">
-                              <a
-                                className="shop-action primary"
-                                href={shop.mapsUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
+                              <a className="shop-action primary" href={shop.mapsUrl} target="_blank" rel="noreferrer">
                                 Open Map
                               </a>
-
                               {shop.phone && (
-                                <a
-                                  className="shop-action"
-                                  href={`tel:${shop.phone}`}
-                                >
+                                <a className="shop-action" href={`tel:${shop.phone}`}>
                                   Call Shop
                                 </a>
                               )}
