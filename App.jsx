@@ -1,113 +1,161 @@
-import React from "react";
+import { useState } from "react";
+import heroImage from "./assets/fixpilot-hero.png";
 
 export default function App() {
+  const [issue, setIssue] = useState("");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleDiagnose = async () => {
+    if (!issue.trim()) return;
+
+    setLoading(true);
+    setResult("");
+
+    try {
+      const res = await fetch("https://fixpilot-beta.onrender.com/diagnose", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ issue }),
+      });
+
+      const data = await res.json();
+      setResult(data.result || "No result returned.");
+    } catch (err) {
+      setResult("Error connecting to FixPilot AI.");
+    }
+
+    setLoading(false);
+  };
+
   return (
-    <div style={styles.app}>
-      {/* HEADER */}
-      <div style={styles.header}>
-        <div style={styles.brand}>
-          <div style={styles.logoContainer}>
-            <img src="/logo.png" alt="FixPilot logo" style={styles.logo} />
-          </div>
+    <div style={styles.container}>
+      {/* NAVBAR */}
+      <div style={styles.navbar}>
+        <div style={styles.logo}>FixPilot AI</div>
+      </div>
 
-          <div>
-            <h1 style={styles.title}>FixPilot</h1>
-            <p style={styles.subtitle}>
-              Your AI mechanic vehicle repair assistant
-            </p>
-          </div>
+      {/* HERO SECTION */}
+      <div style={styles.heroSection}>
+        <img src={heroImage} alt="FixPilot AI" style={styles.heroImage} />
+      </div>
+
+      {/* INPUT SECTION */}
+      <div style={styles.card}>
+        <h2 style={styles.title}>What’s wrong with your vehicle?</h2>
+
+        <textarea
+          placeholder="Example: My car won’t start and I hear clicking noises..."
+          value={issue}
+          onChange={(e) => setIssue(e.target.value)}
+          style={styles.textarea}
+        />
+
+        <button onClick={handleDiagnose} style={styles.button}>
+          {loading ? "Diagnosing..." : "Get Diagnosis"}
+        </button>
+      </div>
+
+      {/* RESULT SECTION */}
+      {result && (
+        <div style={styles.resultCard}>
+          <h3>Diagnosis:</h3>
+          <p style={styles.resultText}>{result}</p>
         </div>
-      </div>
-
-      {/* HERO */}
-      <div style={styles.hero}>
-        <h2 style={styles.heroTitle}>
-          Diagnose your vehicle like a professional mechanic
-        </h2>
-        <p style={styles.heroText}>
-          Describe your symptoms and FixPilot will guide you step-by-step,
-          recommend tools, suggest parts, and help you decide your next move.
-        </p>
-      </div>
-
-      {/* PLACEHOLDER */}
-      <div style={styles.placeholder}>
-        <h3>No diagnosis yet</h3>
-        <p>Enter vehicle details to begin.</p>
-      </div>
+      )}
     </div>
   );
 }
 
 const styles = {
-  app: {
+  container: {
     fontFamily: "Arial, sans-serif",
-    background: "#f4f8fc",
+    background: "#0f172a",
     minHeight: "100vh",
+    color: "white",
+    paddingBottom: "40px",
+  },
+
+  navbar: {
     padding: "20px",
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "20px",
-  },
-
-  brand: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  },
-
-  logoContainer: {
-    width: "70px",
-    height: "70px",
-    borderRadius: "20px",
-    overflow: "hidden",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    fontSize: "22px",
+    fontWeight: "bold",
+    textAlign: "center",
+    background: "#020617",
+    borderBottom: "1px solid #1e293b",
   },
 
   logo: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
+    color: "#ef4444",
+    letterSpacing: "1px",
+  },
+
+  heroSection: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "30px",
+  },
+
+  heroImage: {
+    width: "90%",
+    maxWidth: "900px",
+    borderRadius: "16px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.6)",
+  },
+
+  card: {
+    margin: "40px auto",
+    width: "90%",
+    maxWidth: "600px",
+    background: "#020617",
+    padding: "25px",
+    borderRadius: "12px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
   },
 
   title: {
-    margin: 0,
-    fontSize: "2rem",
+    marginBottom: "15px",
   },
 
-  subtitle: {
-    margin: "4px 0 0",
-    color: "#64748b",
-  },
-
-  hero: {
+  textarea: {
+    width: "100%",
+    minHeight: "120px",
+    padding: "12px",
+    borderRadius: "8px",
+    border: "none",
+    outline: "none",
+    resize: "none",
+    marginBottom: "15px",
     background: "#1e293b",
     color: "white",
-    padding: "25px",
-    borderRadius: "16px",
-    marginBottom: "20px",
   },
 
-  heroTitle: {
-    margin: 0,
-    fontSize: "1.6rem",
+  button: {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#ef4444",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
   },
 
-  heroText: {
+  resultCard: {
+    margin: "20px auto",
+    width: "90%",
+    maxWidth: "600px",
+    background: "#020617",
+    padding: "20px",
+    borderRadius: "12px",
+    border: "1px solid #1e293b",
+  },
+
+  resultText: {
     marginTop: "10px",
-    color: "#cbd5e1",
-  },
-
-  placeholder: {
-    background: "white",
-    padding: "30px",
-    borderRadius: "16px",
-    textAlign: "center",
+    lineHeight: "1.6",
+    whiteSpace: "pre-wrap",
   },
 };
