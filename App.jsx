@@ -958,7 +958,7 @@ export default function App() {
             </div>
             <div className="brand-copy">
               <h1>FixPilot</h1>
-              <p>Mechanic-style vehicle diagnosis assistant</p>
+              <p>Your AI repair assistant</p>
             </div>
           </div>
 
