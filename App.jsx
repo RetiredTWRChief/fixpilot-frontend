@@ -1,5 +1,6 @@
 import { useState } from "react";
 import heroImage from "./assets/fixpilot-hero.png";
+import logoImage from "./assets/fixpilot-logo.png";
 
 export default function App() {
   const [issue, setIssue] = useState("");
@@ -7,7 +8,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
 
   const handleDiagnose = async () => {
-    if (!issue.trim()) return;
+    if (!issue.trim()) {
+      setResult("Please describe the issue first.");
+      return;
+    }
 
     setLoading(true);
     setResult("");
@@ -22,140 +26,259 @@ export default function App() {
       });
 
       const data = await res.json();
-      setResult(data.result || "No result returned.");
-    } catch (err) {
+      setResult(data.result || "No diagnosis returned.");
+    } catch (error) {
       setResult("Error connecting to FixPilot AI.");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  const scrollToDiagnose = () => {
+    document.getElementById("diagnose")?.scrollIntoView({
+      behavior: "smooth",
+    });
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.page}>
       {/* NAVBAR */}
-      <div style={styles.navbar}>
-        <div style={styles.logo}>FixPilot AI</div>
-      </div>
+      <header style={styles.navbar}>
+        <div style={styles.navInner}>
+          <div style={styles.brandWrap}>
+            <img src={logoImage} alt="logo" style={styles.logo} />
+            <div>
+              <div style={styles.brandTitle}>
+                FIXPILOT <span style={styles.brandAccent}>AI</span>
+              </div>
+              <div style={styles.brandSubtitle}>
+                Smart vehicle diagnosis
+              </div>
+            </div>
+          </div>
 
-      {/* HERO SECTION */}
-      <div style={styles.heroSection}>
-        <img src={heroImage} alt="FixPilot AI" style={styles.heroImage} />
-      </div>
+          <div style={styles.navLinks}>
+            <a href="#features" style={styles.navLink}>
+              Features
+            </a>
+            <a href="#diagnose" style={styles.navLink}>
+              Diagnose
+            </a>
+          </div>
+        </div>
+      </header>
 
-      {/* INPUT SECTION */}
-      <div style={styles.card}>
-        <h2 style={styles.title}>What’s wrong with your vehicle?</h2>
+      {/* HERO */}
+      <section style={styles.hero}>
+        <div style={styles.heroContent}>
+          <div style={styles.heroTextBlock}>
+            <h1 style={styles.heroTitle}>
+              Diagnose vehicle problems like a pro.
+            </h1>
+
+            <p style={styles.heroText}>
+              FixPilot AI gives clear, mechanic-style explanations so anyone can
+              understand what’s wrong and what to do next.
+            </p>
+
+            <button style={styles.primaryButton} onClick={scrollToDiagnose}>
+              Start Diagnosis
+            </button>
+          </div>
+
+          <img src={heroImage} alt="hero" style={styles.heroImage} />
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" style={styles.section}>
+        <h2 style={styles.sectionTitle}>Why FixPilot?</h2>
+
+        <div style={styles.grid}>
+          <div style={styles.card}>
+            <h3>🔧 Clear Guidance</h3>
+            <p>No confusing tech talk. Easy instructions.</p>
+          </div>
+
+          <div style={styles.card}>
+            <h3>🚗 Real Problems</h3>
+            <p>Handles real-world car symptoms.</p>
+          </div>
+
+          <div style={styles.card}>
+            <h3>🛠️ Tool Suggestions</h3>
+            <p>Know what you need before you start.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* DIAGNOSIS */}
+      <section id="diagnose" style={styles.section}>
+        <h2 style={styles.sectionTitle}>Try FixPilot AI</h2>
 
         <textarea
-          placeholder="Example: My car won’t start and I hear clicking noises..."
           value={issue}
           onChange={(e) => setIssue(e.target.value)}
+          placeholder="Describe your car issue..."
           style={styles.textarea}
         />
 
-        <button onClick={handleDiagnose} style={styles.button}>
+        <button onClick={handleDiagnose} style={styles.primaryButton}>
           {loading ? "Diagnosing..." : "Get Diagnosis"}
         </button>
-      </div>
 
-      {/* RESULT SECTION */}
-      {result && (
-        <div style={styles.resultCard}>
-          <h3>Diagnosis:</h3>
-          <p style={styles.resultText}>{result}</p>
-        </div>
-      )}
+        {result && (
+          <div style={styles.resultBox}>
+            <p>{result}</p>
+          </div>
+        )}
+      </section>
+
+      {/* FOOTER */}
+      <footer style={styles.footer}>
+        FIXPILOT AI © 2026
+      </footer>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    fontFamily: "Arial, sans-serif",
-    background: "#0f172a",
-    minHeight: "100vh",
+  page: {
+    background: "#0b0f19",
     color: "white",
-    paddingBottom: "40px",
+    minHeight: "100vh",
+    fontFamily: "Arial, sans-serif",
   },
 
   navbar: {
-    padding: "20px",
-    fontSize: "22px",
-    fontWeight: "bold",
-    textAlign: "center",
     background: "#020617",
+    padding: "15px 20px",
     borderBottom: "1px solid #1e293b",
   },
 
-  logo: {
-    color: "#ef4444",
-    letterSpacing: "1px",
+  navInner: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    maxWidth: "1100px",
+    margin: "0 auto",
   },
 
-  heroSection: {
+  brandWrap: {
     display: "flex",
-    justifyContent: "center",
-    marginTop: "30px",
+    alignItems: "center",
+    gap: "10px",
+  },
+
+  logo: {
+    width: "40px",
+  },
+
+  brandTitle: {
+    fontWeight: "bold",
+  },
+
+  brandAccent: {
+    color: "#ef4444",
+  },
+
+  brandSubtitle: {
+    fontSize: "12px",
+    color: "#aaa",
+  },
+
+  navLinks: {
+    display: "flex",
+    gap: "15px",
+  },
+
+  navLink: {
+    color: "#ccc",
+    textDecoration: "none",
+  },
+
+  hero: {
+    padding: "40px 20px",
+  },
+
+  heroContent: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    maxWidth: "1100px",
+    margin: "0 auto",
+    gap: "20px",
+  },
+
+  heroTextBlock: {
+    maxWidth: "500px",
+  },
+
+  heroTitle: {
+    fontSize: "36px",
+  },
+
+  heroText: {
+    margin: "15px 0",
+    color: "#bbb",
   },
 
   heroImage: {
-    width: "90%",
-    maxWidth: "900px",
-    borderRadius: "16px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.6)",
+    width: "400px",
+    borderRadius: "12px",
+  },
+
+  primaryButton: {
+    background: "#ef4444",
+    border: "none",
+    padding: "12px 20px",
+    color: "white",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  section: {
+    padding: "40px 20px",
+    maxWidth: "1100px",
+    margin: "0 auto",
+  },
+
+  sectionTitle: {
+    marginBottom: "20px",
+  },
+
+  grid: {
+    display: "flex",
+    gap: "20px",
   },
 
   card: {
-    margin: "40px auto",
-    width: "90%",
-    maxWidth: "600px",
     background: "#020617",
-    padding: "25px",
-    borderRadius: "12px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-  },
-
-  title: {
-    marginBottom: "15px",
+    padding: "20px",
+    borderRadius: "10px",
+    flex: 1,
   },
 
   textarea: {
     width: "100%",
-    minHeight: "120px",
-    padding: "12px",
-    borderRadius: "8px",
-    border: "none",
-    outline: "none",
-    resize: "none",
+    height: "120px",
     marginBottom: "15px",
-    background: "#1e293b",
-    color: "white",
-  },
-
-  button: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
+    padding: "10px",
+    borderRadius: "6px",
     border: "none",
-    background: "#ef4444",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
   },
 
-  resultCard: {
-    margin: "20px auto",
-    width: "90%",
-    maxWidth: "600px",
+  resultBox: {
+    marginTop: "20px",
     background: "#020617",
-    padding: "20px",
-    borderRadius: "12px",
-    border: "1px solid #1e293b",
+    padding: "15px",
+    borderRadius: "8px",
   },
 
-  resultText: {
-    marginTop: "10px",
-    lineHeight: "1.6",
-    whiteSpace: "pre-wrap",
+  footer: {
+    textAlign: "center",
+    padding: "20px",
+    borderTop: "1px solid #1e293b",
+    marginTop: "40px",
   },
 };
